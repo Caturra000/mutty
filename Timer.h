@@ -59,7 +59,7 @@ public:
         template <typename ...Args>
         TimerHelper& with(Args &&...args) { 
             _thisTimer->append(_when, LazyEvaluate::lazy(std::forward<Args>(args)...), _interval, _atMost); 
-            return *this;    // 不暴露Timer接口
+            return *this;
         }
 
         TimerHelper& per(Nanosecond interval) {
@@ -90,7 +90,7 @@ private:
     EventHeap _container;
     bool _running {false};
     std::mutex _mutex;
-    // TimerHandler _handler;
+    // TcpTimerHandler _handler;
 };
 
 #endif

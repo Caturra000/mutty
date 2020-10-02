@@ -3,7 +3,8 @@
 #include <bits/stdc++.h>
 #include "Handler.h"
 #include "Message.h"
-class TcpHandler: public Handler {
+#include "TcpFeature.h"
+class TcpHandler: public Handler, public TcpFeature {
 public:
 
     HANDLER_MSG_DEFINE(MSG_TCP_ON_ACCEPT);

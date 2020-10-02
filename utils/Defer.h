@@ -3,11 +3,11 @@
 #include <bits/stdc++.h>
 class Defer {
 private:
-    using Defer_ = std::shared_ptr<Defer>;
-    Defer_ defer_;
+    using DeferImpl = std::shared_ptr<Defer>;
+    DeferImpl _defer;
 public:
     template <typename T, typename ...Args>
     Defer(T &&callable, Args &&...args)
-        : defer_(nullptr, [=](Defer*) { callable(std::move(args)...); }) { }
+        : _defer(nullptr, [=](Defer*) { callable(std::move(args)...); }) { }
 };
 #endif

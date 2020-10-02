@@ -31,17 +31,13 @@ public:
     }
 
     void consume(Message msg) {
-        msg.target->handle(msg);
+        msg._target->handle(msg);
     }
 
     void stop() { _quit = true; }
 
     Pointer<MessageQueue> getProvider() { return &_provider; }
 
-
-
-
-    
 
 private:
     bool _quit = false;

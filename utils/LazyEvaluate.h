@@ -37,7 +37,6 @@ public:
     }
     void evaluate() const { _functor(); }
 
-    // IMPROVEMENT: 提供proxy接口，让调用者实现std::bind来解决lambda带参问题 // 或者是proxyable ----> 这个可能要template才能做到，
     
 private:
     using Functor = std::function<void()>;

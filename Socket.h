@@ -20,9 +20,6 @@ public:
     Socket accept(InetAddress &clientAddress);
     Socket accept();
     void finish() {}
-
-    // bool isValid() { return _socketFd > 0; }
-    void detach() {  } 
     
     Socket(): _socketFd(socket(AF_INET, SOCK_STREAM, 0)) { if(_socketFd < 0) throw std::exception(); }
     ~Socket() { close(_socketFd); }
@@ -45,7 +42,7 @@ public:
 
 
     
-    void asServer(const InetAddress &serverAddress, int backlog = 128, Option option = Option::FULL_FEATURE);
+    // void asServer(const InetAddress &serverAddress, int backlog = 128, Option option = Option::FULL_FEATURE);
 
 protected:
     Socket(int socketFd): _socketFd(socketFd) { } // unsafe
@@ -88,15 +85,15 @@ inline Socket Socket::accept() {
 }
 
 
-inline void Socket::asServer(const InetAddress &serverAddress, int backlog, Option option) {
-    bindAndListen(serverAddress, backlog);
-    int opt = option._option;
-    // 固定的配置，这里就不写的oop了
-    if(opt & Option::NO_DELAY) setNoDelay();
-    if(opt & Option::REUSE_ADDR) setReuseAddr();
-    if(opt & Option::REUSE_PORT) setReusePort();
-    if(opt & Option::KEEP_ALIVE) setKeepAlive();
-}
+// inline void Socket::asServer(const InetAddress &serverAddress, int backlog, Option option) {
+//     bindAndListen(serverAddress, backlog);
+//     int opt = option._option;
+//     // 固定的配置，这里就不写的oop了
+//     if(opt & Option::NO_DELAY) setNoDelay();
+//     if(opt & Option::REUSE_ADDR) setReuseAddr();
+//     if(opt & Option::REUSE_PORT) setReusePort();
+//     if(opt & Option::KEEP_ALIVE) setKeepAlive();
+// }
 
 inline void Socket::setNoDelay(bool on) {
     int optval = on;
