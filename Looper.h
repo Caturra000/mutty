@@ -19,42 +19,21 @@ public:
     // static
     void loop() {
         if(_threadId != std::this_thread::get_id()) return;
-        // if(_quit) return;
-        //_timer.run();
-
-        for(; !_quit; ) {
-            // TODO: poll---->append msg到mq中
-            _timer.run();  
-            // 考虑到MPSC模型，用move来避免处理消息SC对MP的阻塞
-            // MP之间没有重量级操作，用mutex的自旋优化即可
-            MessageQueue provider;
+        
+        for(MessageQueue provider; !_quit; ) {
+            // IMRPOVEMENT: 是否可根据一些条件来得知provider没有数据，节省不必要的上锁？
             {
                 std::lock_guard<std::mutex> _ {_provider.queueLock()};
                 provider = std::move(_provider); // move并不移动原有的锁
             }
-            //auto provider = std::move(_provider);
             while(provider.hasNext()) {
                 consume(provider.next());
             }
         }
-        // me = myLooper();
-        // mq = me.mq;
-        // for(;;)
-        //     msg = mq.next();
-        //     msg.target.dispatch(msg);
     }
 
     void consume(Message msg) {
         msg.target->handle(msg);
-        // 为了以后只需继承handler就能修改消息处理机制，实现还是不要放到Looper上
-        // auto consumer = msg.target;
-        // switch(msg._what) {
-        //     case 0:
-        //         consumer->onConnected();
-        //     break;
-        //     default:
-        //     break;
-        // }
     }
 
     void stop() { _quit = true; }
