@@ -29,6 +29,18 @@ public:
 
     // IMPROVEMENT: 提供析构行为定制器
 
+    T* get() { return _ptr; } // 兼容
+
+
+    // 解决多态的转型比较麻烦，比如Pointer<Deri> --> Pointer<Base> 
+    // 对比方案：
+    // static_cast<Base*>(pointer.get())
+    // pointer.castTo<Base>()
+    template <typename Base>
+    Base* castTo() { 
+        static_assert(std::is_base_of<Base, T>::value, "can only cast to Pointer<Base>/Base*");
+        return _ptr;
+    }
 
 protected:
     T* _ptr;

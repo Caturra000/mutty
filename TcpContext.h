@@ -15,7 +15,13 @@
 class TcpHandler;
 class TcpContext: public Context {
 public:
-    // s和inet都是对端的信息，既然是一条Connection，那生命周期应是绑定的
+
+// MESSAGE定制
+
+    CONTEXT_MSG_DEFINE(MSG_ON_CONNECT);
+    CONTEXT_MSG_DEFINE(MSG_ON_MESSAGE);
+    CONTEXT_MSG_DEFINE(MSG_ON_WRITE_COMPLETE);
+    CONTEXT_MSG_DEFINE(MSG_ON_CLOSE);
 
 // 网络特性支持
 
@@ -33,6 +39,16 @@ public:
     LazyEvaluate binder(std::function<void(TcpContext*)> functor) {
         return LazyEvaluate::lazy(std::move(functor), this);
     }
+
+    // void sendReadMessage() override { _messagequeue->post({static_cast<Handler*>(_handler.get()), MSG_ON_MESSAGE});}
+    void sendReadMessage() override { _messagequeue->post({_handler.castTo<Handler>(), MSG_ON_MESSAGE});}
+
+    int fd() const override { return acceptedSocket.fd(); }
+    int events() const override { return 0; }
+
+    TcpContext(Pointer<TcpHandler> handler)
+        : _handler(handler) { }
+
 
 protected:
     Pointer<TcpHandler> _handler; // master

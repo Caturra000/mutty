@@ -2,7 +2,7 @@
 #define __CONTEXT_H__
 #include <bits/stdc++.h>
 
-// 命名规范： CONTEXT_<Context类型>_<Message>
+// 命名规范： MSG_<Message>
 #define CONTEXT_MSG_DEFINE(messageType) \
     const static int messageType = __LINE__ 
 
@@ -14,6 +14,11 @@ public:
     virtual void sendWriteMessage() = 0;
     virtual void sendErrorMessage() = 0;
     virtual void sendCloseMessage() = 0;
+
+// poll
+
+    virtual int fd() const = 0;
+    virtual int events() const = 0;
 };
 
 // using DefaultContext = Context;
