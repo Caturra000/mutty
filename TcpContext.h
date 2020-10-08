@@ -18,10 +18,11 @@ public:
 
 // MESSAGE定制
 
-    CONTEXT_MSG_DEFINE(MSG_ON_CONNECT);
-    CONTEXT_MSG_DEFINE(MSG_ON_MESSAGE);
-    CONTEXT_MSG_DEFINE(MSG_ON_WRITE_COMPLETE);
-    CONTEXT_MSG_DEFINE(MSG_ON_CLOSE);
+    // CONTEXT_MSG_DEFINE(MSG_POLL_READ);
+    // CONTEXT_MSG_DEFINE(MSG_POLL_WRITE);
+    // CONTEXT_MSG_DEFINE(MSG_POLL_ERROR);
+    // CONTEXT_MSG_DEFINE(MSG_POLL_CLOSE);
+    
 
 // 网络特性支持
 
@@ -40,14 +41,18 @@ public:
         return LazyEvaluate::lazy(std::move(functor), this);
     }
 
-    void sendReadMessage() override { _messagequeue->post({_handler.castTo<Handler>(), MSG_ON_MESSAGE});}
-    void sendWriteMessage() override {}
-    void sendErrorMessage() override {}
-    void sendCloseMessage() override {}
+    void sendMessage(int what) { _messageQueue->post({_handler.castTo<Handler>(), what}); } // 这个可以实现pendingFunction的功能
 
 
+
+// ONLY FOR POLLER
+
+    void sendReadMessage() override  { sendMessage(MSG_POLL_READ);  }
+    void sendWriteMessage() override { sendMessage(MSG_POLL_WRITE); }
+    void sendErrorMessage() override { sendMessage(MSG_POLL_ERROR); }
+    void sendCloseMessage() override { sendMessage(MSG_POLL_CLOSE); }
     int fd() const override { return acceptedSocket.fd(); }
-    int events() const override { return 0; }
+    uint32_t events() const override { return 0; } // TODO
 
     TcpContext(Pointer<TcpHandler> handler)
         : _handler(handler) { }
@@ -55,6 +60,6 @@ public:
 
 protected:
     Pointer<TcpHandler> _handler; // master
-    Pointer<MessageQueue> _messagequeue; // post to mq
+    Pointer<MessageQueue> _messageQueue; // post to mq
 };
 #endif

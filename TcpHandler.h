@@ -14,21 +14,24 @@ public:
 
 // Handler的日常
 
+
+
     virtual void handle(Message msg) override {
         switch(msg.what) {
-            case TcpContext::MSG_ON_CONNECT:
-                _connectionCallback.evaluate();
+            case TcpContext::MSG_POLL_READ:
+                handleRead();
             break;
-            case TcpContext::MSG_ON_MESSAGE:
-                _messageCallback.evaluate();
+            case TcpContext::MSG_POLL_WRITE:
+                handleWrite();
             break;
-            case TcpContext::MSG_ON_WRITE_COMPLETE:
-                _writeCompleteCallback.evaluate();
+            case TcpContext::MSG_POLL_ERROR:
+                handleError();
             break;
-            case TcpContext::MSG_ON_CLOSE:
-                _closeCallback.evaluate();
+            case TcpContext::MSG_POLL_CLOSE:
+                handleClose();
             break;
             default:
+            ;
         }
     }
 
@@ -40,7 +43,7 @@ public:
     //     handler.setOnConnect(func, arg0, arg1, arg2);
 
     HANDLER_CALLBACK_DEFINE(onConnect,       _connectionCallback)
-    HANDLER_CALLBACK_DEFINE(onMessage,       _messaageCallback)
+    HANDLER_CALLBACK_DEFINE(onMessage,       _messageCallback)
     HANDLER_CALLBACK_DEFINE(onWriteComplete, _writeCompleteCallback)
     HANDLER_CALLBACK_DEFINE(onClose,         _closeCallback)
 
@@ -54,10 +57,37 @@ public:
 
     // FIXME: 类型推导时，[](ctx*)会选择HANDLER_CALLBACK_DEFINE，如何让其失败而非错误
 
+// 用于外部定义的函数
+
     void onMessageWithCtx(ContextFunctor functor) { onMessage(std::move(functor), &_ctx); }
     void onWriteCompleteWithCtx(ContextFunctor functor) { onWriteComplete(std::move(functor), &_ctx); }
     void onCloseWithCtx(ContextFunctor functor) { onClose(std::move(functor), &_ctx); }
+
+
+
+    void handleRead() {
+        int n; // = buffer.read
+        if(n > 0) {
+            _messageCallback.evaluate();
+        } else if(n == 0) {
+            handleClose();
+        } else {
+            handleError();
+        }
+    }
+
+    void handleWrite() {
+        int n; // = write
+    }
     
+    void handleError() {
+        // throw
+    }
+
+    void handleClose() {
+        _connectionCallback.evaluate();
+        _closeCallback.evaluate();
+    }
 
 
     TcpHandler(): _ctx(this) { }

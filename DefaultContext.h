@@ -11,20 +11,16 @@ class Handler;
 // 用于简单实现的包装类，如果是相对复杂的实现，应该直接继承Context，并且明确Handler是哪种类型
 class DefaultContext: public Context {
 public:
-    CONTEXT_MSG_DEFINE(MSG_READ);
-    CONTEXT_MSG_DEFINE(MSG_WRITE);
-    CONTEXT_MSG_DEFINE(MSG_ERROR);
-    CONTEXT_MSG_DEFINE(MSG_CLOSE);
+    void sendMessage(int what) { _messageQueue->post({_handler, what}); } 
 
+    void sendReadMessage() override  { sendMessage(MSG_POLL_READ);  }
+    void sendWriteMessage() override { sendMessage(MSG_POLL_WRITE); }
+    void sendErrorMessage() override { sendMessage(MSG_POLL_ERROR); }
+    void sendCloseMessage() override { sendMessage(MSG_POLL_CLOSE); }
 
     DefaultContext(Handler *handler = nullptr, MessageQueue *messageQueue = nullptr)
         : _handler(handler),
           _messageQueue(messageQueue) { }
-
-    void sendReadMessage() override { if(_messageQueue) _messageQueue->post({_handler, MSG_READ}); }
-    void sendWriteMessage() override { if(_messageQueue) _messageQueue->post({_handler, MSG_WRITE}); }
-    void sendErrorMessage() override { if(_messageQueue) _messageQueue->post({_handler, MSG_ERROR}); }
-    void sendCloseMessage() override { if(_messageQueue) _messageQueue->post({_handler, MSG_CLOSE}); }
 
     // fd()
 
