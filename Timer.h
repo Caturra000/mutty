@@ -30,23 +30,25 @@ public:
     void run() {
         std::lock_guard<std::mutex> _ {_mutex};
         if(_container.empty()) return;
-        std::vector<TimerEvent> newbee;
+        std::vector<TimerEvent> reenterables;
+        Defer reenter { [&] {
+            for(auto &e : reenterables) _container.push(std::move(e));
+        }};
         Timestamp current = now();
         while(!_container.empty()) {
             auto &e = _container.top();
             if(e._when > current) break;
             Defer _ {[this] { _container.pop(); }};
-            if(e._atMost > 0) e._what.evaluate();
+            if(e._atMost > 0) e._what.evaluate(); // TODO： 交付给MQ和Handler FIXED：不需要改动
             if(e._atMost > 1) {
-                newbee.push_back(e);
-                auto &b = newbee.back();
+                reenterables.push_back(e); // copy，并不确定move堆上的top再pop是否会UB，如果可行，可以最后再reenter时atmost--
+                auto &b = reenterables.back();
                 b._atMost--;
                 b._when += b._interval;
                 // 解决资源饥饿，每8次重新调度
                 if(!(b._atMost & 7)) b._ticket += random();
             }
         }
-        for(auto &e : newbee) _container.push(std::move(e));
     }
 
 // Builder Start
@@ -90,7 +92,6 @@ private:
     EventHeap _container;
     bool _running {false};
     std::mutex _mutex;
-    // TcpTimerHandler _handler;
 };
 
 #endif

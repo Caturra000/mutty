@@ -14,7 +14,7 @@
 
 
 // 针对socket fd的浅层封装，要求只有fd一个成员
-struct Socket: Noncopyable {
+class Socket: public Noncopyable {
 public:
     
     Socket accept(InetAddress &clientAddress);
@@ -22,8 +22,15 @@ public:
     void finish() {}
     
     Socket(): _socketFd(socket(AF_INET, SOCK_STREAM, 0)) { if(_socketFd < 0) throw std::exception(); }
-    ~Socket() { close(_socketFd); }
-    
+    ~Socket() { if(_socketFd >= 0) close(_socketFd); } // 被移动的socketfd < 0
+    explicit Socket(int socketFd): _socketFd(socketFd) { assert(_socketFd >= 0); } // unsafe
+    Socket(Socket &&rhs): _socketFd(rhs._socketFd) { rhs._socketFd = -1; }
+    Socket& operator=(Socket &&rhs) {
+        if(this == &rhs) return *this;
+        _socketFd = rhs._socketFd;
+        rhs._socketFd = -1;
+        return *this;
+    }
     
     struct Option {
         const static int NO_DELAY   = 1 << 0;
@@ -39,18 +46,12 @@ public:
         Option(int option = DEFAULT): _option(option) {}
     };
 
+    int fd() const { return _socketFd; }
 
+    void config(Option option);
 
-    
-    // void asServer(const InetAddress &serverAddress, int backlog = 128, Option option = Option::FULL_FEATURE);
-
-protected:
-    Socket(int socketFd): _socketFd(socketFd) { } // unsafe
 
 public:
-    const int _socketFd;
-
-private:
 
     // IMPROVEMENT: 把error-code改为try-catch，error-code的存在让封装变得麻烦
     // TODO: exception类型需要定义
@@ -58,7 +59,7 @@ private:
     // wrapper
     void bind(const InetAddress &address) { if(::bind(_socketFd, (const sockaddr*)(&address), sizeof(InetAddress))) throw std::exception(); }
     void listen(int backlog = 128) { if(::listen(_socketFd, backlog)) throw std::exception(); }
-    void bindAndListen(const InetAddress &serverAddress, int backlog) { bind(serverAddress); listen(backlog); } // true if error      // 这里的bool是个败笔
+    void bindAndListen(const InetAddress &serverAddress, int backlog) { bind(serverAddress); listen(backlog); }
     // setter
     void setNoDelay(bool on = true);
     void setReuseAddr(bool on = true);
@@ -67,10 +68,9 @@ private:
 
     // 更多的tcp/socket选项还是给unix api来做吧
 
+private:
+    int _socketFd;
 };
-
-
-
 
 inline Socket Socket::accept(InetAddress &address) {
     int connectFd = ::accept4(_socketFd, (sockaddr*)(&address), nullptr,
@@ -84,16 +84,13 @@ inline Socket Socket::accept() {
     return Socket(connectFd);
 }
 
-
-// inline void Socket::asServer(const InetAddress &serverAddress, int backlog, Option option) {
-//     bindAndListen(serverAddress, backlog);
-//     int opt = option._option;
-//     // 固定的配置，这里就不写的oop了
-//     if(opt & Option::NO_DELAY) setNoDelay();
-//     if(opt & Option::REUSE_ADDR) setReuseAddr();
-//     if(opt & Option::REUSE_PORT) setReusePort();
-//     if(opt & Option::KEEP_ALIVE) setKeepAlive();
-// }
+inline void Socket::config(Option option) {
+    int opt = option._option;
+    if(opt & Option::NO_DELAY) setNoDelay();
+    if(opt & Option::REUSE_ADDR) setReuseAddr();
+    if(opt & Option::REUSE_PORT) setReusePort();
+    if(opt & Option::KEEP_ALIVE) setKeepAlive();
+}
 
 inline void Socket::setNoDelay(bool on) {
     int optval = on;
@@ -110,7 +107,6 @@ inline void Socket::setReuseAddr(bool on) {
         throw std::exception();
     }
 }
-
 
 inline void Socket::setReusePort(bool on) {
     int optval = on;

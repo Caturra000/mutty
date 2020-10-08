@@ -4,7 +4,7 @@
 
 class Buffer {
 public:
-    Buffer(int size): _size(size), _buf(size), _r(0), _w(0), _total(size) { }
+    Buffer(int size = 128): _size(size), _buf(size), _r(0), _w(0), _total(size) { }
     
 private:
     std::vector<char> _buf;

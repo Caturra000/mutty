@@ -12,7 +12,6 @@
 // 一般用于表示该指针的生命周期大于被嵌入的类   
 template <typename T>
 class Pointer {
-    T* _ptr;
 public:
     Pointer(T* ptr = nullptr): _ptr(ptr) { }
     Pointer(const Pointer &rhs): _ptr(rhs._ptr) { }
@@ -28,7 +27,11 @@ public:
     explicit operator bool() { return _ptr; }
     ~Pointer() { }
 
-    // IMPROVEMENT: 提供默认删除器
+    // IMPROVEMENT: 提供析构行为定制器
+
+
+protected:
+    T* _ptr;
 };
 
 

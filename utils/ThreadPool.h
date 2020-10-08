@@ -15,12 +15,12 @@ public:
     auto post(F &&f, Args &&...args)->std::future<typename std::result_of<F(Args...)>::type>;
 
     ThreadPool(int size);
+    ~ThreadPool();
 private:
     std::vector<std::thread> _workers;
-
     std::mutex _mutex;
     std::condition_variable _condition;
-
+    bool _quit { false };
 };
 
 #endif

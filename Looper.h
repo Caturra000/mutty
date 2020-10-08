@@ -11,14 +11,16 @@
 // #include "TimerEvent.h"
 // #include "TimerHelper.h"
 // 处理一个Channel中的所有IO操作
-class Context;
+// class Context;
 class Looper {
-    friend Context;
+    // friend Context;
 public:
     void loop() {
         if(_threadId != std::this_thread::get_id()) return;
         
         for(MessageQueue provider; !_quit; ) {
+            // poll...
+
             // IMRPOVEMENT: 是否可根据一些条件来得知provider没有数据，节省不必要的上锁？
             {
                 std::lock_guard<std::mutex> _ {_provider.queueLock()};
@@ -30,19 +32,24 @@ public:
         }
     }
 
-    void consume(Message msg) {
-        msg._target->handle(msg);
-    }
+
 
     void stop() { _quit = true; }
 
     Pointer<MessageQueue> getProvider() { return &_provider; }
-
+    
+private:
+    // In Loop Thread
+    void consume(Message msg) {
+        msg.target->handle(msg);
+    }
 
 private:
     bool _quit = false;
     std::thread::id _threadId = std::this_thread::get_id();
     MessageQueue _provider; // provider不会区分不同类型的消息，总是对应于同一个Looper
     // Multiplexer _multiplexer;
+
+    
 };
 #endif

@@ -6,17 +6,17 @@
 // 一个用于MPSC场合的消息队列
 class MessageQueue {
 public:
-    int size() const { return _mq.size(); }
-    bool hasNext() const { return !_mq.empty(); }
+    int size() const { return _queue.size(); }
+    bool hasNext() const { return !_queue.empty(); }
     Message next(); // 不保证线程安全，由Looper控制
     void post(Message msg);
     MessageQueue() = default;
     ~MessageQueue() = default;
     // 需要定制move行为，不移动mutex
-    MessageQueue(MessageQueue &&rhs): _mq(std::move(rhs._mq)) {}
+    MessageQueue(MessageQueue &&rhs): _queue(std::move(rhs._queue)) {}
     MessageQueue& operator=(MessageQueue &&rhs) {
         if(this == &rhs) return *this;
-        _mq = std::move(rhs._mq);
+        _queue = std::move(rhs._queue);
         return *this;
     }
 
@@ -24,19 +24,19 @@ public:
     std::mutex& queueLock() { return _mutex; }
 
 private:
-    std::queue<Message> _mq;
+    std::queue<Message> _queue;
     std::mutex _mutex;
 };
 
 inline void MessageQueue::post(Message msg) {
     std::lock_guard<std::mutex> _{_mutex};
-    _mq.push(msg); 
+    _queue.push(msg); 
 }
 
 inline Message MessageQueue::next() {
-    if(_mq.empty()) return {};
-    auto msg = _mq.front();
-    _mq.pop();
+    if(_queue.empty()) return {};
+    auto msg = _queue.front();
+    _queue.pop();
     return msg;
 }
 #endif

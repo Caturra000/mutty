@@ -10,29 +10,18 @@
 #define HANDLER_MSG_DEFINE(name) \
     const static int name = __LINE__
 
-
+#define HANDLER_CALLBACK_DEFINE(functionName, callbackMember) \
+    template <typename Functor, typename ...Args> \
+    void functionName(Functor &&functor, Args &&...args) { \
+        callbackMember = LazyEvaluate::lazy(std::forward<Functor>(functor), std::forward<Args>(args)...); \
+    }
 
 
 class Handler {
-private:
-    // std::vector<LazyEvaluate> _connectedObservers;
-    // std::vector<LazyEvaluate> _readObservers;
-    // std::vector<LazyEvaluate> _readFinishedObservers;
-    // std::vector<LazyEvaluate> _closeObservers;
-    // std::unique_ptr<Context> _context // Context&
 public:
-    // void registerOnConnected(LazyEvaluate callback) {
-    //     _connectedObservers.emplace_back(std::move(callback));
-    // }
-
-    
-
-
-
     // 处理消息的业务逻辑接口
     virtual void handle(Message msg) = 0;
     virtual ~Handler() { }
-    
 };
 
 #endif

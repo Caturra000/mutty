@@ -8,7 +8,7 @@
 // 对地址类的浅层封装，要求大小与sockaddr_in一致 / 内存顶部是sockaddr_in
 struct InetAddress {
 public:
-    InetAddress(sockaddr_in address): _address(address) { } // POD不需要move 且成本低不需要const&
+    InetAddress(sockaddr_in address = {}): _address(address) { } // POD不需要move 且成本低不需要const&
     InetAddress(uint32_t ip, uint16_t port): _address{AF_INET, htons(port), htonl(ip)} { } // TODO 参数需要using隐藏
     InetAddress(const std::string &address) {
         auto pivot = split(address, ':');
@@ -17,6 +17,7 @@ public:
                     toDec<uint16_t>(address.substr(pivot[1].first, pivot[1].second - pivot[1].first)));
     } 
     std::string toString() { return ipToString() + ":" + std::to_string(_address.sin_port); } // "192.168.0.1:2333"
+    // TODO 用memcpy实现copy/move
 
 private:
 
@@ -32,6 +33,7 @@ private:
         return s;
     }
     
+    // static
     uint32_t stringToIp(std::string s) {
         auto pivots = split(s, '.');
         uint32_t ip = 0;
