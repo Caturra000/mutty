@@ -48,7 +48,6 @@ private:
     bool _quit = false;
     std::thread::id _threadId = std::this_thread::get_id();
     MessageQueue _provider; // provider不会区分不同类型的消息，总是对应于同一个Looper
-    // Multiplexer _multiplexer;
     Multiplexer _poller;
     
 };

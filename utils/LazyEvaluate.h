@@ -3,13 +3,6 @@
 #include <bits/stdc++.h>
 #include "Noncopyable.h"
 
-// FIXME: 目前对于lambda无法提供有参数的支持[](必须空) {}
-// 目前的问题是即便在lazy阶段也会出错，因为functor本身是一个function<void()>
-// 用template好像确实是最简单的改法，对于lazy和evalute都能零成本提供接口，只是这样的话，普通的函数体还能不能放在一块？  
-// 到头来还是变成了std::bind和占位符的设计，果然STL写的是通用的
-// 不如尝试用std::bind再一次倒推出这种封装？这次改为封装占位符
-// 更加通用的话可以造一个is_lambda轮子：https://stackoverflow.com/questions/4661875/is-a-c-is-lambda-trait-purely-implemented-as-a-library-impossible
-// 通过is_lambda和编译时判断是否可构造为function<void()>来另开一条分支
 
 // @brief: a wrapper of std::function and std::bind, mainly used for callback
 // @usage:

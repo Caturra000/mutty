@@ -39,31 +39,31 @@ public:
     //     handler.setOnConnectWithCtx([](TcpContext *ctx) { ctx->setXX(); });
     //     handler.setOnConnect(func, arg0, arg1, arg2);
 
-    HANDLER_CALLBACK_DEFINE(onConnect,       _connectionCallback);
-    HANDLER_CALLBACK_DEFINE(onMessage,       _messaageCallback);
-    HANDLER_CALLBACK_DEFINE(onWriteComplete, _writeCompleteCallback);
-    HANDLER_CALLBACK_DEFINE(onClose,         _closeCallback);
+    HANDLER_CALLBACK_DEFINE(onConnect,       _connectionCallback)
+    HANDLER_CALLBACK_DEFINE(onMessage,       _messaageCallback)
+    HANDLER_CALLBACK_DEFINE(onWriteComplete, _writeCompleteCallback)
+    HANDLER_CALLBACK_DEFINE(onClose,         _closeCallback)
 
 
 
     using ContextFunctor = std::function<void(TcpContext*)>;
     void onConnectWithCtx(ContextFunctor functor) { // 由于重载决议的坑，目前先这么用着
-        onConnect(std::move(functor), _ctx.get());
+        onConnect(std::move(functor), &_ctx);
         // _connectionCallback = _ctx->binder(std::move(functor)); // 不必每个Context都提供这么不可描述的接口
     }
 
     // FIXME: 类型推导时，[](ctx*)会选择HANDLER_CALLBACK_DEFINE，如何让其失败而非错误
 
-    void onMessageWithCtx(ContextFunctor functor) { onMessage(std::move(functor), _ctx.get()); }
-    void onWriteCompleteWithCtx(ContextFunctor functor) { onWriteComplete(std::move(functor), _ctx.get()); }
-    void onCloseWithCtx(ContextFunctor functor) { onClose(std::move(functor), _ctx.get()); }
+    void onMessageWithCtx(ContextFunctor functor) { onMessage(std::move(functor), &_ctx); }
+    void onWriteCompleteWithCtx(ContextFunctor functor) { onWriteComplete(std::move(functor), &_ctx); }
+    void onCloseWithCtx(ContextFunctor functor) { onClose(std::move(functor), &_ctx); }
     
 
 
-
+    TcpHandler(): _ctx(this) { }
 
 protected:
-    std::unique_ptr<TcpContext> _ctx;
+    TcpContext _ctx;
 
     LazyEvaluate _connectionCallback;
     LazyEvaluate _messageCallback;

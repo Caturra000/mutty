@@ -40,8 +40,11 @@ public:
         return LazyEvaluate::lazy(std::move(functor), this);
     }
 
-    // void sendReadMessage() override { _messagequeue->post({static_cast<Handler*>(_handler.get()), MSG_ON_MESSAGE});}
     void sendReadMessage() override { _messagequeue->post({_handler.castTo<Handler>(), MSG_ON_MESSAGE});}
+    void sendWriteMessage() override {}
+    void sendErrorMessage() override {}
+    void sendCloseMessage() override {}
+
 
     int fd() const override { return acceptedSocket.fd(); }
     int events() const override { return 0; }
