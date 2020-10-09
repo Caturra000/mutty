@@ -16,10 +16,10 @@ public:
     CONTEXT_MSG_DEFINE(MSG_POLL_ERROR);
     CONTEXT_MSG_DEFINE(MSG_POLL_CLOSE);
 
-    virtual void sendReadMessage() = 0;
-    virtual void sendWriteMessage() = 0;
-    virtual void sendErrorMessage() = 0;
-    virtual void sendCloseMessage() = 0;
+    virtual void sendReadMessage() {}
+    virtual void sendWriteMessage() {}
+    virtual void sendErrorMessage() {}
+    virtual void sendCloseMessage() {}
 
 // poll
 
