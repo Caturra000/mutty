@@ -7,7 +7,7 @@
     const static int messageType = __COUNTER__+1 
 
 // 只提供接口部分，该接口会应用于IO复用
-// 虽然设计上是都会post到某个MQ，但作为接口，持有MQ的指针或者send(MQ)都不太必要，因此多提供一个DefaultContext
+// 虽然设计上是都会post到某个MQ，但作为接口，持有MQ的指针或者send(MQ)都不太必要，因此多提供一个ContextImpl
 class Context {
 public:
 
@@ -25,9 +25,13 @@ public:
 
     virtual int fd() const = 0;
     virtual uint32_t events() const = 0;
+
+    // update
+    // add remove change
+    // status
 };
 
-// using DefaultContext = Context;
+// using ContextImpl = Context;
 
 
 

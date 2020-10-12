@@ -27,13 +27,10 @@ public:
     }
 
     // 不会阻塞，只会执行到不符合条件的时间就返回
-    void run() {
+    Nanosecond run() {
         std::lock_guard<std::mutex> _ {_mutex};
-        if(_container.empty()) return;
+        if(_container.empty()) return Nanosecond::zero();
         std::vector<TimerEvent> reenterables;
-        Defer reenter { [&] {
-            for(auto &e : reenterables) _container.push(std::move(e));
-        }};
         Timestamp current = now();
         while(!_container.empty()) {
             auto &e = _container.top();
@@ -49,6 +46,9 @@ public:
                 if(!(b._atMost & 7)) b._ticket += random();
             }
         }
+        for(auto &e : reenterables) _container.push(std::move(e)); // 同event在单次run只运行一次
+        if(!_container.empty()) return _container.top()._when - now(); // 如果是负数？
+        return Nanosecond::zero();
     }
 
 // Builder Start

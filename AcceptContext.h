@@ -1,11 +1,11 @@
 #ifndef __ACCEPT_CONTEXT_H
 #define __ACCEPT_CONTEXT_H
 #include "utils/Pointer.h"
-#include "DefaultContext.h"
+#include "ContextImpl.h"
 #include "Socket.h"
 #include "InetAddress.h"
 class Handler;
-class AcceptContext: public DefaultContext {
+class AcceptContext: public ContextImpl {
 public:
 
     CONTEXT_MSG_DEFINE(MSG_SOCKET_LISTEN);
@@ -22,7 +22,7 @@ public:
 
     AcceptContext(Handler *handler, MessageQueue *messageQueue, 
         Socket connectSocket, const InetAddress &localAddress, const InetAddress &peerAddress)
-        : DefaultContext(handler, messageQueue),
+        : ContextImpl(handler, messageQueue),
           connectSocket(std::move(connectSocket)),
           localAddress(localAddress),
           peerAddress(peerAddress) { }

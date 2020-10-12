@@ -1,5 +1,5 @@
-#ifndef __DEFAULT_CONTEXT_H__
-#define __DEFAULT_CONTEXT_H__
+#ifndef __CONTEXT_IMPL_H__
+#define __CONTEXT_IMPL_H__
 #include <bits/stdc++.h>
 #include "Context.h"
 #include "MessageQueue.h"
@@ -9,7 +9,7 @@
 class Handler;
 
 // 用于简单实现的包装类，如果是相对复杂的实现，应该直接继承Context，并且明确Handler是哪种类型
-class DefaultContext: public Context {
+class ContextImpl: public Context {
 public:
     void sendMessage(int what) { _messageQueue->post({_handler, what}); } 
 
@@ -18,7 +18,7 @@ public:
     void sendErrorMessage() override { sendMessage(MSG_POLL_ERROR); }
     void sendCloseMessage() override { sendMessage(MSG_POLL_CLOSE); }
 
-    DefaultContext(Handler *handler = nullptr, MessageQueue *messageQueue = nullptr)
+    ContextImpl(Handler *handler = nullptr, MessageQueue *messageQueue = nullptr)
         : _handler(handler),
           _messageQueue(messageQueue) { }
 
