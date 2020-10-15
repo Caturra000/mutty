@@ -4,7 +4,7 @@
 #include "Noncopyable.h"
 
 
-// @brief: a wrapper of std::function and std::bind, mainly used for callback
+// @brief: a wrapper of std::function, mainly used for callback
 // @usage:
 //     auto callback = LazyEvaluate::lazy(functor, args);
 //     // ....
@@ -21,7 +21,8 @@ public:
 
     template <typename Func, typename ...Args>
     static LazyEvaluate lazy(Func &&functor, Args &&...args) {
-        return LazyEvaluate( std::bind(std::forward<Func>(functor), std::forward<Args>(args)...) );
+        // return LazyEvaluate( std::bind(std::forward<Func>(functor), std::forward<Args>(args)...) );
+        return LazyEvaluate ([=] { std::move(functor)(std::move(args)...); });
     }
     void evaluate() const { _functor(); }
     // void evaluateWithCheck() const { if(_functor) _functor(); } // 我寻思正常人应该没这种需求

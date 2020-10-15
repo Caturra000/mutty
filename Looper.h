@@ -9,12 +9,7 @@
 #include "MessageQueue.h"
 #include "Multiplexer.h"
 #include "Timer.h"
-// #include "TimerEvent.h"
-// #include "TimerHelper.h"
-// 处理一个Channel中的所有IO操作
-// class Context;
 class Looper {
-    // friend Context;
 public:
     void loop() {
         if(_threadId != std::this_thread::get_id()) return;
@@ -38,6 +33,8 @@ public:
     void stop() { _quit = true; }
 
     Pointer<MessageQueue> getProvider() { return &_provider; }
+    Pointer<Multiplexer> getPoller() { return &_poller; }
+    Pointer<Timer> getTimer() { return &_timer; }
     
 private:
     // In Loop Thread

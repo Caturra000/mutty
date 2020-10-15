@@ -20,9 +20,9 @@ public:
 
     // send {flag = id} TODO
 
-    AcceptContext(Handler *handler, MessageQueue *messageQueue, 
-        Socket connectSocket, const InetAddress &localAddress, const InetAddress &peerAddress)
-        : ContextImpl(handler, messageQueue),
+    AcceptContext(Handler *handler, Looper *looper, Socket connectSocket, 
+        const InetAddress &localAddress, const InetAddress &peerAddress)
+        : ContextImpl(handler, looper),
           connectSocket(std::move(connectSocket)),
           localAddress(localAddress),
           peerAddress(peerAddress) { }

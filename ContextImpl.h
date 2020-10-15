@@ -5,6 +5,7 @@
 #include "MessageQueue.h"
 #include "Message.h"
 #include "utils/Pointer.h"
+#include "Looper.h"
 
 class Handler;
 
@@ -18,9 +19,9 @@ public:
     void sendErrorMessage() override { sendMessage(MSG_POLL_ERROR); }
     void sendCloseMessage() override { sendMessage(MSG_POLL_CLOSE); }
 
-    ContextImpl(Handler *handler = nullptr, MessageQueue *messageQueue = nullptr)
+    ContextImpl(Handler *handler = nullptr, Looper *looper = nullptr)
         : _handler(handler),
-          _messageQueue(messageQueue) { }
+          _messageQueue(looper ? looper->getProvider() : nullptr) { }
 
     // fd()
 
