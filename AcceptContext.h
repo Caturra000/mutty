@@ -10,22 +10,25 @@ public:
 
     CONTEXT_MSG_DEFINE(MSG_SOCKET_LISTEN);
 
-    int fd() const override { return connectSocket.fd(); }
+    int fd() const override { return acceptSocket.fd(); }
     uint32_t events() const override { return 0; }
 
-    Socket connectSocket;
+    // Socket connectSocket;
+    // InetAddress peerAddress;
+    // int acceptedId;
+
+    Socket acceptSocket;
     InetAddress localAddress;
-    InetAddress peerAddress;
-    int acceptedId;
+
 
     // send {flag = id} TODO
 
-    AcceptContext(Handler *handler, Looper *looper, Socket connectSocket, 
-        const InetAddress &localAddress, const InetAddress &peerAddress)
-        : ContextImpl(handler, looper),
-          connectSocket(std::move(connectSocket)),
-          localAddress(localAddress),
-          peerAddress(peerAddress) { }
+    // AcceptContext(Handler *handler, Looper *looper, Socket connectSocket, 
+    //     const InetAddress &localAddress, const InetAddress &peerAddress)
+    //     : ContextImpl(handler, looper),
+    //       connectSocket(std::move(connectSocket)),
+    //       localAddress(localAddress),
+    //       peerAddress(peerAddress) { }
           
 };
 #endif
