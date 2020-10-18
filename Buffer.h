@@ -2,20 +2,100 @@
 #define __BUFFER_H__
 #include <bits/stdc++.h>
 
+// 一个简单的Socket IO Buffer
+// 提供char*兼容，以及尽可能延迟扩容
 class Buffer {
 public:
     Buffer(int size = 128): _size(size), _buf(size), _r(0), _w(0), _total(size) { }
     
 private:
     std::vector<char> _buf;
-    std::vector<char> _next;
+    std::vector<char> _next; // UNUSED
     int _size, _total;
-    int _r, _w;
+    int _r, _w; // _r >= _w
 
-    void read() { // 理应返回一对值 ===> 但是跨buffer了，草
-        while(_r!=_w) _r++;
+    // 没想到啥简洁的名字，先占位
+
+    // 还有多少未读取
+    int rest() {
+        return _r - _w;
     }
+
+    // 还有多少彻底填满
+    int limit() {
+        return _buf.size() - _r;
+    }
+
+    int freeSpace() {
+        return _buf.size() - rest();
+    }
+
+    void reuse() {
+        _r = _w = 0;
+    }
+
+    // 能否复用，尽量延迟resize
+    // TODO 当rest()为一个极少占比的时候，尝试copy
+    void reuseIfPossible() {
+        if(_r == _w) {
+            reuse();
+        }
+    }
+
+    // 处理边缘碎片
+    void gc() {
+        if(_w > 0) {
+            // move [_w, _r] to front
+            memmove(_buf.data(), _buf.data() + _w, rest());
+            _r = rest(); _w = 0;
+        }
+        
+    }
+
+
+    // lazy resize if it can
+    void gc(int hint) {
+        if(hint <= limit()) return;
+        gc();
+        // still cannot store
+        if(hint > freeSpace()) {
+            // TODO expand    exactly or powerOf2?
+            int appendSize = freeSpace() - hint;
+            int expectSize = _buf.size() + appendSize;
+            auto roundToPowerOfTwo = [](int v)->int {
+                v--;
+                v |= v >> 1; v |= v >> 2;
+                v |= v >> 4; v |= v >> 8;
+                v |= v >> 16;
+                return ++v;
+            };
+            expandTo(roundToPowerOfTwo(expectSize));
+        }
+    }
+
+    void expand() {
+        int size = _buf.size();
+        _buf.resize(size << 1);
+    }
+
+
+
+    void expandTo(int size) {
+        _buf.resize(size);
+    }
+
+    void read(int n) { 
+        // if
+        _r += n; 
+    }
+    void write(int n) {  // 实际write后调用
+        _w += n; 
+        reuseIfPossible();
+    }
+
+
     
+
 
 };
 #endif

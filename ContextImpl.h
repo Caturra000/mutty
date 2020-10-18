@@ -12,7 +12,21 @@ class Handler;
 // 用于简单实现的包装类，如果是相对复杂的实现，应该直接继承Context，并且明确Handler是哪种类型
 class ContextImpl: public Context {
 public:
-    void sendMessage(int what) { _messageQueue->post({_handler, what}); } 
+    void sendMessage(int what) { _messageQueue->post({_handler.get(), what}); } 
+    void sendMessage(int what, int flag) { _messageQueue->post({_handler.get(), what, flag}); }
+
+    // 接口需要手动控制data生命周期
+    void sendMessageWithData(int what, void *data) { 
+        _messageQueue->post( Message {
+            .target = _handler.get(),
+            .what = what,
+            .any = data
+        });    
+    }
+    
+    void sendMessageWithBinaryData(int what, int size, void *data) {
+        _messageQueue->post({_handler.get(), what, size, data});
+    }
 
     void sendReadMessage() override  { sendMessage(MSG_POLL_READ);  }
     void sendWriteMessage() override { sendMessage(MSG_POLL_WRITE); }
