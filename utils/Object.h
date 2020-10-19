@@ -1,15 +1,13 @@
 #ifndef __UTILS_OBJECT_H__
 #define __UTILS_OBJECT_H__
 #include <bits/stdc++.h>
-#include <boost/any.hpp>
 // 实现C++11下的std::any
-// 什么时候引入更多高版本STL依赖再去掉这个类
 class Object final {
 public:
 
     constexpr Object(): _content(nullptr) { }
-    template <typename ValueType>
-    Object(ValueType value): _content(new Holder<ValueType>(std::move(value))) { }
+    template <typename ValueType, typename NonRef = typename std::remove_reference<ValueType>::type>
+    Object(ValueType &&value): _content(new Holder<NonRef>(std::forward<ValueType>(value))) { }
     Object(const Object &rhs): _content(rhs._content ? rhs._content->clone() : nullptr) { }
     Object(Object &&rhs): _content(rhs._content) { rhs._content = nullptr; }
     ~Object() { delete _content; }
