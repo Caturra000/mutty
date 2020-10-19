@@ -67,16 +67,16 @@ inline const ValueType* cast(const Exchanger *object) {
 }
 
 
-// 不返回副本，直接提供自身引用
+// 必须使用&
 template <typename ValueType>
-inline ValueType& cast(Exchanger &object) {
+inline ValueType cast(Exchanger &object) {
     using NonRef = typename std::remove_reference<ValueType>::type;
     return *(cast<NonRef>(std::addressof(object)));
 }
 
-// 不返回副本，直接提供自身引用
+// 必须使用&
 template <typename ValueType>
-inline ValueType& cast(const Exchanger &object) {
+inline ValueType cast(const Exchanger &object) {
     using NonRef = typename std::remove_reference<ValueType>::type;
     return cast<const NonRef &>(const_cast<Exchanger&>(object));
 }
