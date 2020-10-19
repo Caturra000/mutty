@@ -1,42 +1,93 @@
 #ifndef __UTILS_OBJECT_H__
 #define __UTILS_OBJECT_H__
 #include <bits/stdc++.h>
+#include <boost/any.hpp>
 // 实现C++11下的std::any
 // 什么时候引入更多高版本STL依赖再去掉这个类
-class Object {
+class Object final {
 public:
-    Object(): _content(nullptr) {}
+
+    constexpr Object(): _content(nullptr) { }
+    template <typename ValueType>
+    Object(ValueType value): _content(new Holder<ValueType>(std::move(value))) { }
+    Object(const Object &rhs): _content(rhs._content ? rhs._content->clone() : nullptr) { }
+    Object(Object &&rhs): _content(rhs._content) { rhs._content = nullptr; }
     ~Object() { delete _content; }
 
-    template <typename ValueType>
-    Object(const ValueType &content): _content(new Holder<ValueType>(content)) { }
-
-    Object(const Object &rhs)
-        : _content(rhs._content ? rhs._content->clone() : nullptr) {}
-    Object(Object &&rhs): _content(rhs._content) { rhs._content = nullptr; }
-    Object& operator=(Object rhs) {
-        std::swap(rhs, *this);
+    Object& swap(Object &rhs) {
+        std::swap(_content, rhs._content);
         return *this;
     }
 
+    Object& operator=(const Object &rhs) {
+        Object(rhs).swap(*this);
+        return *this;
+    }
 
-    class IHolder {
+    Object operator=(Object &&rhs) {
+        rhs.swap(*this);
+        Object().swap(rhs);
+        return *this;
+    }
+
+    template <typename ValueType>
+    Object& operator=(ValueType &&rhs) {
+        Object(std::forward<ValueType>(rhs)).swap(*this);
+        return *this;
+    }
+
+private:
+    class PlaceHolder {
     public:
-        virtual IHolder* clone() = 0;
+        virtual ~PlaceHolder() { } //
+        virtual PlaceHolder* clone() const = 0;
     };
 
     template <typename ValueType>
-    class Holder: public IHolder {
+    class Holder: public PlaceHolder {
     public:
-        Holder(const ValueType &value): _value(value) { }
-        IHolder* clone() override {
-            return new Holder(_value);
-        }
-        ValueType _value;
+        Holder(const ValueType &value): _held(value) { }
+        Holder(ValueType &&value): _held(static_cast<ValueType&&>(value)) { }
+        PlaceHolder* clone() const override { return new Holder(_held); }
+        ValueType _held;
+
+        Holder& operator=(const Holder&) = delete;
     };
 
 private:
-    IHolder *_content;
+    template <typename ValueType>
+    friend ValueType* cast(Object*);
+
+    PlaceHolder* _content;
 };
+
+inline void swap(Object &lhs, Object &rhs) {
+    lhs.swap(rhs);
+}
+
+template <typename ValueType>
+inline ValueType* cast(Object *object) {
+    return object ? 
+        std::addressof(static_cast<Object::Holder<ValueType>*>(object->_content)->_held)
+        : nullptr;
+}
+
+template <typename ValueType>
+inline const ValueType* cast(const Object *object) {
+    return cast<ValueType>(const_cast<Object*>(object));
+}
+
+template <typename ValueType>
+inline ValueType cast(Object &object) {
+    using NonRef = typename std::remove_reference<ValueType>::type;
+    return *(cast<NonRef>(std::addressof(object)));
+}
+
+template <typename ValueType>
+inline ValueType cast(const Object &object) {
+    using NonRef = typename std::remove_reference<ValueType>::type;
+    return cast<const NonRef &>(const_cast<Object&>(object));
+}
+
 
 #endif
