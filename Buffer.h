@@ -13,6 +13,7 @@ private:
     std::vector<char> _next; // UNUSED
     int _size, _total;
     int _r, _w; // _r >= _w
+    int _reserveSize; // TODO 方便添加header，使得__r >= _w > _reserve
 
     // 没想到啥简洁的名字，先占位
 
@@ -46,8 +47,8 @@ private:
     void gc() {
         if(_w > 0) {
             // move [_w, _r] to front
-            memmove(_buf.data(), _buf.data() + _w, rest());
-            _r = rest(); _w = 0;
+            memmove(_buf.data(), _buf.data() + _w, _r = rest());
+            _w = 0;
         }
         
     }
@@ -93,7 +94,31 @@ private:
         reuseIfPossible();
     }
 
+    char* getReadBuffer() {
+        return _buf.data() + _r;
+    }
 
+    char* getWriteBuffer() {
+        return _buf.data() + _w;
+    }
+
+    char* end() {
+        return _buf.data() + _buf.size();
+    }
+
+    
+
+    void append(const char *data, int size) {
+        gc(size);
+        std::copy(data, data + size, getReadBuffer());
+        _r += size;
+    }
+
+    // not a pointer
+    template <typename T>
+    void append(const T &data) {
+        append(static_cast<const char *>(&data), sizeof(T));
+    }
     
 
 
