@@ -5,38 +5,38 @@
 // 什么时候引入更多高版本STL依赖再去掉这个类
 class Object {
 public:
-    Object(): _holder(nullptr) {}
-    ~Object() { delete _holder; }
+    Object(): _content(nullptr) {}
+    ~Object() { delete _content; }
 
-    template <typename T>
-    Object(T &&t): _holder(new T(std::forward<T>(t))) { }
+    template <typename ValueType>
+    Object(const ValueType &content): _content(new Holder<ValueType>(content)) { }
 
     Object(const Object &rhs)
-        : _holder(rhs._holder ? rhs._holder->clone() : nullptr) {}
-    Object(Object &&rhs): _holder(rhs._holder) { rhs._holder = nullptr; }
-    Object & operator=(Object rhs) {
+        : _content(rhs._content ? rhs._content->clone() : nullptr) {}
+    Object(Object &&rhs): _content(rhs._content) { rhs._content = nullptr; }
+    Object& operator=(Object rhs) {
         std::swap(rhs, *this);
         return *this;
     }
+
 
     class IHolder {
     public:
         virtual IHolder* clone() = 0;
     };
 
-    template <typename T>
+    template <typename ValueType>
     class Holder: public IHolder {
     public:
-        Holder(T &&t): _t(std::forward<T>(t)) { }
+        Holder(const ValueType &value): _value(value) { }
         IHolder* clone() override {
-            return new Holder;
+            return new Holder(_value);
         }
-        
-        T _t;
+        ValueType _value;
     };
 
 private:
-    IHolder *_holder;
+    IHolder *_content;
 };
 
 #endif
