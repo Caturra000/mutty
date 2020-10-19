@@ -1,6 +1,7 @@
 #ifndef __ACCEPT_CONTEXT_H
 #define __ACCEPT_CONTEXT_H
 #include "utils/Pointer.h"
+#include "utils/Exchanger.h"
 #include "ContextImpl.h"
 #include "Socket.h"
 #include "InetAddress.h"
@@ -19,6 +20,7 @@ public:
     Socket acceptSocket;
     InetAddress localAddress;
 
+    Exchanger exchanger;
 
     // send {flag = id} TODO
 
