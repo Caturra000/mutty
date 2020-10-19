@@ -22,7 +22,7 @@ public:
         return *this;
     }
 
-    Object operator=(Object &&rhs) {
+    Object& operator=(Object &&rhs) {
         rhs.swap(*this);
         Object().swap(rhs);
         return *this;
