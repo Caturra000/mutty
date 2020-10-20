@@ -30,7 +30,7 @@ private:
 
 class BufferPool {
 public:
-    CachedBuffer obtain(int sizeHint) { // FIXME: 不允许有0大小的buffer
+    CachedBuffer obtain(int sizeHint = 128) { // FIXME: 不允许有0大小的buffer
         int n = findCeilOfPowerOfTwo(sizeHint);
         if(!_pool[n].empty()) {
             auto cachedBuffer = std::move(_pool[n].back());
@@ -38,7 +38,7 @@ public:
             return cachedBuffer;
         }
         return CachedBuffer(roundToPowerOfTwo(sizeHint), [this](CachedBuffer &buffer) {
-            int n = findCeilOfPowerOfTwo(buffer.size()); // 下取整
+            int n = findCeilOfPowerOfTwo(buffer.size()); // FIXME 下取整
             buffer.clear();
             _pool[n].emplace_back(std::move(buffer));
         });
