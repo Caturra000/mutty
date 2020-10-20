@@ -4,16 +4,17 @@
 #include "Socket.h"
 #include "InetAddress.h"
 #include "Buffer.h"
+#include "BufferPool.h"
 #include "Timer.h"
 #include "Message.h"
 #include "MessageQueue.h"
 #include "utils/LazyEvaluate.h"
 #include "utils/Pointer.h"
-#include "Context.h"
+#include "ContextImpl.h"
 
 // 按照逻辑上，应该由Accept过程生成
 class TcpHandler;
-class TcpContext: public Context {
+class TcpContext: public ContextImpl {
 public:
 
 // MESSAGE定制
@@ -27,8 +28,8 @@ public:
 // 网络特性支持
 
     Socket acceptedSocket;
-    InetAddress localInet, peerInet;
-    Buffer inputBuffer, outputBuffer;
+    InetAddress localAddress, peerAddress;
+    CachedBuffer inputBuffer, outputBuffer;
 
 // 定时器特性支持
 
@@ -41,25 +42,18 @@ public:
         return LazyEvaluate::lazy(std::move(functor), this);
     }
 
-    void sendMessage(int what) { _messageQueue->post({_handler.castTo<Handler>(), what}); } // 这个可以实现pendingFunction的功能
-
-
-
 // ONLY FOR POLLER
 
-    void sendReadMessage() override  { sendMessage(MSG_POLL_READ);  }
-    void sendWriteMessage() override { sendMessage(MSG_POLL_WRITE); }
-    void sendErrorMessage() override { sendMessage(MSG_POLL_ERROR); }
-    void sendCloseMessage() override { sendMessage(MSG_POLL_CLOSE); }
     int fd() const override { return acceptedSocket.fd(); }
     uint32_t events() const override { return 0; } // TODO
 
-    TcpContext(Pointer<TcpHandler> handler)
-        : _handler(handler) { }
 
+    TcpContext(Handler *handler, Looper *looper, 
+            Socket acceptedSocket, InetAddress localAddress, InetAddress peerAddress)
+        : ContextImpl(handler, looper),
+          acceptedSocket(std::move(acceptedSocket)),
+          localAddress(localAddress),
+          peerAddress(peerAddress) {}
 
-protected:
-    Pointer<TcpHandler> _handler; // master
-    Pointer<MessageQueue> _messageQueue; // post to mq
 };
 #endif

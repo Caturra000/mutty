@@ -3,6 +3,7 @@
 #include <bits/stdc++.h>
 #include "Handler.h"
 #include "Message.h"
+#include "Looper.h"
 #include "TcpContext.h"
 #include "utils/Pointer.h"
 #include "utils/Pointer.h"
@@ -90,7 +91,9 @@ public:
     }
 
 
-    TcpHandler(): _ctx(this) { }
+    TcpHandler(Looper *looper, Socket acceptedSocket,
+                InetAddress localAddress, InetAddress peerAddress)
+        : _ctx(this, looper, std::move(acceptedSocket), localAddress, peerAddress) { }
 
 protected:
     TcpContext _ctx;

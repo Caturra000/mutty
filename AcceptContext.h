@@ -15,19 +15,23 @@ public:
     int fd() const override { return acceptSocket.fd(); }
     uint32_t events() const override { return 0; }
 
-
+// 上下文相关
 
     Socket acceptSocket;
     InetAddress localAddress;
 
+// 跨组件交互特性支持
+
     Exchanger exchanger;
 
-    // send {flag = id} TODO
 
-    AcceptContext(Handler *handler, Looper *looper, 
-        Socket acceptSocket, InetAddress localAddress)
+    AcceptContext(Handler *handler, Looper *looper, InetAddress localAddress)
         : ContextImpl(handler, looper),
-          acceptSocket(std::move(acceptSocket)),
-          localAddress(localAddress) { } // TODO add timer...
+          localAddress(localAddress) {
+        using Option = Socket::Option;
+        // TODO nonblock
+        acceptSocket.config(Option::REUSE_PORT | Option::REUSE_ADDR);
+        acceptSocket.bind(localAddress);
+    }
 };
 #endif
