@@ -2,10 +2,8 @@
 #define __UTILS_OBJECT_H__
 #include <bits/stdc++.h>
 // 实现C++11下的std::any
-template <bool IsCopyable = true>
 class Object final {
 public:
-    // TODO 通过template将Exchanger和Object合并为一个类，用SFINAE屏蔽copy相关接口
 
     constexpr Object(): _content(nullptr) { }
     template <typename ValueType, typename NonRef = typename std::remove_reference<ValueType>::type>
