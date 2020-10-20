@@ -24,6 +24,12 @@ auto findCeilOfPowerOfTwo = [](int v) {
     return n+1;
 };
 
+auto findFloorOfPowerOfTwo = [](int v) {
+    int n = highestBitPosition(v);
+    if(isPowerOfTwo(v)) return n;
+    return n-1;
+};
+
 // 实现一个线程安全的简易随机数生成器
 template <typename T = unsigned long long, unsigned long long init = 19260817>
 inline T random() {

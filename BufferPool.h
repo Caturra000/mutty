@@ -38,7 +38,7 @@ public:
             return cachedBuffer;
         }
         return CachedBuffer(roundToPowerOfTwo(sizeHint), [this](CachedBuffer &buffer) {
-            int n = findCeilOfPowerOfTwo(buffer.size()); // FIXME 下取整
+            int n = findFloorOfPowerOfTwo(buffer.size());
             buffer.clear();
             _pool[n].emplace_back(std::move(buffer));
         });
