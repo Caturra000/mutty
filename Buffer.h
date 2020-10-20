@@ -1,34 +1,42 @@
 #ifndef __BUFFER_H__
 #define __BUFFER_H__
 #include <bits/stdc++.h>
-
+#include "utils/Algorithms.h"
 // 一个简单的Socket IO Buffer
 // 提供char*兼容，以及尽可能延迟扩容
 class Buffer {
 public:
-    Buffer(int size = 128): _size(size), _buf(size), _r(0), _w(0), _total(size) { }
+    Buffer(int size = 128): _size(size), _buf(size), _r(0), _w(0) { }
     
 private:
     std::vector<char> _buf;
-    std::vector<char> _next; // UNUSED
-    int _size, _total;
+    int _size;  // ==capacity
     int _r, _w; // _r >= _w
-    int _reserveSize; // TODO 方便添加header，使得__r >= _w > _reserve
 
-    // 没想到啥简洁的名字，先占位
+public:
+
+    void clear() {
+        _r = _w = 0;
+        // TODO 用_size控制吧
+    }
+
+    int size() {
+        return _size;
+    }
 
     // 还有多少未读取
     int rest() {
         return _r - _w;
     }
 
+
     // 还有多少彻底填满
     int limit() {
-        return _buf.size() - _r;
+        return _size - _r;
     }
 
     int freeSpace() {
-        return _buf.size() - rest();
+        return _size - rest();
     }
 
     void reuse() {
@@ -63,26 +71,18 @@ private:
             // TODO expand    exactly or powerOf2?
             int appendSize = freeSpace() - hint;
             int expectSize = _buf.size() + appendSize;
-            auto roundToPowerOfTwo = [](int v)->int {
-                v--;
-                v |= v >> 1; v |= v >> 2;
-                v |= v >> 4; v |= v >> 8;
-                v |= v >> 16;
-                return ++v;
-            };
-            expandTo(roundToPowerOfTwo(expectSize));
+            expandTo(_size = roundToPowerOfTwo(expectSize));
         }
     }
 
     void expand() {
-        int size = _buf.size();
-        _buf.resize(size << 1);
+        _buf.resize(_size = (_size << 1));
     }
 
 
 
     void expandTo(int size) {
-        _buf.resize(size);
+        _buf.resize(_size = size);
     }
 
     void read(int n) { 

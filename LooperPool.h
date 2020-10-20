@@ -1,7 +1,7 @@
 #ifndef __LOOPER_POOL_H__
 #define __LOOPER_POOL_H__
 #include <bits/stdc++.h>
-#include "utils/Random.h"
+#include "utils/Algorithms.h"
 #include "Looper.h"
 
 // 具体用途是每次accept都分配到固定大小的Looper池中
