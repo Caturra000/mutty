@@ -10,24 +10,29 @@ public:
     // 返回值只建议在调用该方法的最小作用域内使用
     std::unique_ptr<TcpHandler>& createNewConnection(
             Socket acceptedsocket, InetAddress localAddress, InetAddress peerAddress) {
-        auto connection = std::make_unique<TcpHandler>(
-                _looperPool.pick().get(), 
-                std::move(acceptedsocket), localAddress, peerAddress); 
-        if(!_reuseableIndex.empty()) {
-            int pos = _reuseableIndex.back();
-            _container[pos] = std::move(connection);
-            _reuseableIndex.pop_back();
-            return _container[pos];
-        } else {
-            _container.emplace_back(std::move(connection));
-            return _container.back();
-        }
+        // auto connection = std::make_unique<TcpHandler>(
+        //         _looperPool.pick().get(), 
+        //         std::move(acceptedsocket), localAddress, peerAddress); 
+        // if(!_reuseableIndex.empty()) {
+        //     int pos = _reuseableIndex.back();
+        //     _container[pos] = std::move(connection);
+        //     _reuseableIndex.pop_back();
+        //     return _container[pos];
+        // } else {
+        //     _container.emplace_back(std::move(connection));
+        //     return _container.back();
+        // }
+
+        _container.insert(std::make_unique<TcpHandler>(
+            _looperPool.pick().get(), 
+            std::move(acceptedsocket), localAddress, peerAddress));
     }
 private:
     // std::map<int, std::unique_ptr<TcpHandler>> _container;
 
-    std::vector<std::unique_ptr<TcpHandler>> _container;
-    std::vector<int> _reuseableIndex; // TODO reuse策略 目前没解决碎片问题 给出简单均摊O(1)的倍增gc也可以
+    // std::vector<std::unique_ptr<TcpHandler>> _container;
+    // std::vector<int> _reuseableIndex; // TODO reuse策略 目前没解决碎片问题 给出简单均摊O(1)的倍增gc也可以
+    std::set<std::unique_ptr<TcpHandler>> _container;
     LooperPool<1<<4> _looperPool;
 };
 #endif
