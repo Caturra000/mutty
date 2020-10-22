@@ -31,6 +31,13 @@ public:
         rhs._socketFd = -1;
         return *this;
     }
+
+    // int fd = std::move(socket);
+    operator int() && {
+        int fd = _socketFd;
+        _socketFd = -1;
+        return fd;
+    }
     
     struct Option {
         const static int NO_DELAY   = 1 << 0;
