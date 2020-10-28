@@ -5,7 +5,7 @@
 class Exchanger final {
 public:
 
-    constexpr Exchanger(): _content(nullptr) { }
+    /*constexpr*/ Exchanger(): _content(nullptr) { }
     template <typename ValueType, typename NonRef = typename std::remove_reference<ValueType>::type>
     Exchanger(ValueType &&value): _content(new Holder<NonRef>(static_cast<ValueType&&>(value))) { }
     Exchanger(Exchanger &&rhs): _content(rhs._content) { rhs._content = nullptr; }

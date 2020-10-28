@@ -5,7 +5,7 @@
 class Object final {
 public:
 
-    constexpr Object(): _content(nullptr) { }
+    /*constexpr*/ Object(): _content(nullptr) { }
     template <typename ValueType, typename NonRef = typename std::remove_reference<ValueType>::type>
     Object(ValueType &&value): _content(new Holder<NonRef>(std::forward<ValueType>(value))) { }
     Object(const Object &rhs): _content(rhs._content ? rhs._content->clone() : nullptr) { }
