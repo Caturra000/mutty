@@ -19,7 +19,7 @@ public:
     
     Socket accept(InetAddress &clientAddress);
     Socket accept();
-    void finish() {}
+    void detach() { _socketFd = -1; }
     
     Socket(): _socketFd(socket(AF_INET, SOCK_STREAM, 0)) { if(_socketFd < 0) throw std::exception(); }
     ~Socket() { if(_socketFd >= 0) close(_socketFd); } // 被移动的socketfd < 0
