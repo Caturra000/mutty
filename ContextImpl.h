@@ -7,6 +7,7 @@
 #include "utils/Pointer.h"
 #include "Looper.h"
 #include "Multiplexer.h"
+#include <poll.h>
 
 class Handler;
 
@@ -55,6 +56,7 @@ public:
     void enableWrite()  override { _events |= EVENT_WRITE; updateState(); }
     void disableRead()  override { _events &= ~EVENT_READ; updateState(); }
     void disableWrite() override { _events &= ~EVENT_WRITE; updateState(); }
+    // error / close
 
     ContextImpl(Handler *handler = nullptr, Looper *looper = nullptr)
         : _handler(handler),
@@ -81,8 +83,8 @@ protected:
 // for events
 
     constexpr static uint32_t EVENT_NONE = 0;
-    constexpr static uint32_t EVENT_READ = 1 << 0;
-    constexpr static uint32_t EVENT_WRITE = 1 << 1;
+    constexpr static uint32_t EVENT_READ = POLL_IN | POLL_PRI;
+    constexpr static uint32_t EVENT_WRITE = POLL_OUT;
     
     
 };
