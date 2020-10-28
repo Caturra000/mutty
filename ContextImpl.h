@@ -30,7 +30,7 @@ public:
         _messageQueue->post({_handler.get(), what, size, data});
     }
 
-    void sendReadMessage() override  { sendMessage(MSG_POLL_READ);  }
+    void sendReadMessage()  override { sendMessage(MSG_POLL_READ);  }
     void sendWriteMessage() override { sendMessage(MSG_POLL_WRITE); }
     void sendErrorMessage() override { sendMessage(MSG_POLL_ERROR); }
     void sendCloseMessage() override { sendMessage(MSG_POLL_CLOSE); }
@@ -51,10 +51,10 @@ public:
         }
     }
 
-    void enableRead() override { _events |= EVENT_READ; }
-    void enableWrite() override { _events |= EVENT_WRITE; }
-    void disableRead() override { _events &= ~EVENT_READ; }
-    void disableWrite() override { _events &= ~EVENT_WRITE; }
+    void enableRead()   override { _events |= EVENT_READ; updateState(); }
+    void enableWrite()  override { _events |= EVENT_WRITE; updateState(); }
+    void disableRead()  override { _events &= ~EVENT_READ; updateState(); }
+    void disableWrite() override { _events &= ~EVENT_WRITE; updateState(); }
 
     ContextImpl(Handler *handler = nullptr, Looper *looper = nullptr)
         : _handler(handler),
