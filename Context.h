@@ -25,7 +25,13 @@ public:
 
     virtual int fd() const = 0;
     virtual uint32_t events() const = 0;
+    virtual int state() const = 0;
 
+    virtual void updateStatus() {}
+    virtual void enableRead() {}
+    virtual void enableWrite() {}
+    virtual void disableRead() {}
+    virtual void disableWrite() {}
     // update
     // add remove change
     // status

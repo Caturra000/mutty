@@ -33,6 +33,15 @@ public:
     void sendErrorMessage() override { sendMessage(MSG_POLL_ERROR); }
     void sendCloseMessage() override { sendMessage(MSG_POLL_CLOSE); }
 
+
+    virtual int state() const { return _state; }
+
+    virtual void updateStatus();
+    virtual void enableRead();
+    virtual void enableWrite();
+    virtual void disableRead();
+    virtual void disableWrite();
+
     ContextImpl(Handler *handler = nullptr, Looper *looper = nullptr)
         : _handler(handler),
           _messageQueue(looper ? looper->getProvider() : nullptr) { }
@@ -42,6 +51,8 @@ public:
 protected:
     Pointer<Handler> _handler;
     Pointer<MessageQueue> _messageQueue;
+
+    int _state;
 };
 
 #endif

@@ -17,9 +17,7 @@
 class Socket: public Noncopyable {
 public:
     
-    Socket accept(InetAddress &clientAddress);
-    Socket accept();
-    void detach() { _socketFd = -1; }
+    
     
     Socket(): _socketFd(socket(AF_INET, SOCK_STREAM, 0)) { if(_socketFd < 0) throw std::exception(); }
     ~Socket() { if(_socketFd >= 0) close(_socketFd); } // 被移动的socketfd < 0
@@ -60,14 +58,19 @@ public:
 
 public:
 
-    // IMPROVEMENT: 把error-code改为try-catch，error-code的存在让封装变得麻烦
     // TODO: exception类型需要定义
 
-    // wrapper
+// wrapper
+
     void bind(const InetAddress &address) { if(::bind(_socketFd, (const sockaddr*)(&address), sizeof(InetAddress))) throw std::exception(); }
     void listen(int backlog = 128) { if(::listen(_socketFd, backlog)) throw std::exception(); }
     void bindAndListen(const InetAddress &serverAddress, int backlog) { bind(serverAddress); listen(backlog); }
-    // setter
+    Socket accept(InetAddress &clientAddress);
+    Socket accept();
+    void detach() { _socketFd = -1; }
+
+// setter
+
     void setNoDelay(bool on = true);
     void setReuseAddr(bool on = true);
     void setReusePort(bool on = true);

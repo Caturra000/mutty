@@ -35,7 +35,7 @@ public:
             _window.right = -1;
         };
         if(_reusableIndex != 0) { // need GC
-            for(int step = 0; step < 2; ++step) {
+            for(int _ = 0; _ < step; ++_) {
                 if(_window.left > _window.right) { // 未启动
                     if(_container[_window.left] == nullptr) { // 可以启动
                         ++_window.right;
@@ -53,8 +53,7 @@ public:
                 // left/right < reuseIndex
                 if(_window.right + 1 == _reusableIndex) { // merge, [left,right] + [reuse,size()) 全是nullptr，可回收
                     _reusableIndex = _window.left;
-                    // close window
-                    resetWindow();
+                    resetWindow(); // close window
                 } else if(_container[_window.right + 1] == nullptr) {
                     ++_window.right;
                 } else { // 没有触发到reuse，但是找到一个可用连接
@@ -66,13 +65,15 @@ public:
         }
     }
 
+    ConnectionPool(int size = 16): _container(size), _reusableIndex(0), _window{0,-1} { }
+
+
 private:
     std::vector<std::unique_ptr<TcpHandler>> _container;
 
     int _reusableIndex; // 第一个可用的index
     struct { int left, right; } _window; // 用于维护回收连接的窗口
-
-    ConnectionPool(int size = 16): _container(size), _reusableIndex(0), _window{0,-1} { }
+    constexpr static int step = 2;
 
     LooperPool<1<<4> _looperPool;
 };
