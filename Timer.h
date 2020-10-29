@@ -36,9 +36,9 @@ public:
             auto &e = _container.top();
             if(e._when > current) break;
             Defer _ {[this] { _container.pop(); }};
-            if(e._atMost > 0) e._what.evaluate(); // TODO： 交付给MQ和Handler FIXED：不需要改动
+            if(e._atMost > 0) e._what.evaluate();
             if(e._atMost > 1) {
-                reenterables.push_back(e); // copy，并不确定move堆上的top再pop是否会UB，如果可行，可以最后再reenter时atmost--
+                reenterables.push_back(e);
                 auto &b = reenterables.back();
                 b._atMost--;
                 b._when += b._interval;

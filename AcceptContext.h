@@ -13,7 +13,6 @@ public:
     CONTEXT_MSG_DEFINE(MSG_ACCEPT_WITH_DATA);
 
     int fd() const override { return acceptSocket.fd(); }
-    uint32_t events() const override { return 0; }
 
 // 上下文相关
 

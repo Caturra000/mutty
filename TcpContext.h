@@ -45,7 +45,6 @@ public:
 // ONLY FOR POLLER
 
     int fd() const override { return acceptedSocket.fd(); }
-    uint32_t events() const override { return 0; } // TODO
 
 
     TcpContext(Handler *handler, Looper *looper, 
