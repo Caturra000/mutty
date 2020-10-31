@@ -24,6 +24,10 @@ public:
         }
     }
 
+    ConnectionPool(int size = 16): _container(size), _reusableIndex(0), _window{0,-1} { }
+
+private:
+
     bool reusable() { return _reusableIndex != _container.size(); }
 
     // 一个GC接口
@@ -65,7 +69,6 @@ public:
         }
     }
 
-    ConnectionPool(int size = 16): _container(size), _reusableIndex(0), _window{0,-1} { }
 
 
 private:
