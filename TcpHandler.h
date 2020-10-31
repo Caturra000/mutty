@@ -55,7 +55,7 @@ public:
         onConnect(std::move(functor), &_ctx);
         // _connectionCallback = _ctx->binder(std::move(functor)); // 不必每个Context都提供这么不可描述的接口
     }
-
+    // TODO onConnectionWithWeakCtx(std::weak_ptr<...> ctx) 提供弱回调支持
     // FIXME: 类型推导时，[](ctx*)会选择HANDLER_CALLBACK_DEFINE，如何让其失败而非错误
 
 // 用于外部定义的函数
