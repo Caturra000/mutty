@@ -22,7 +22,7 @@ public:
     template <typename Func, typename ...Args>
     static LazyEvaluate lazy(Func &&functor, Args &&...args) {
         // return LazyEvaluate( std::bind(std::forward<Func>(functor), std::forward<Args>(args)...) );
-        return LazyEvaluate ([=] { std::move(functor)(std::move(args)...); }); // C++14 [f = std::move(f)] {...} FIXME: use MoveWrapper
+        return LazyEvaluate ([=] { functor(std::move(args)...); }); // C++14 [f = std::move(f)] {...} FIXME: use MoveWrapper
     }
     void evaluate() const { _functor(); }
     // void evaluateWithCheck() const { if(_functor) _functor(); } // 我寻思正常人应该没这种需求

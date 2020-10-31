@@ -1,7 +1,7 @@
 #ifndef __UTILS_THREAD_POOL_H__
 #define __UTILS_THREAD_POOL_H__
 #include <bits/stdc++.h>
-#include "utils/LazyEvaluate.h"
+// #include "utils/LazyEvaluate.h" // 独立使用
 // FIXED
 class ThreadPool {
 public:
@@ -10,12 +10,12 @@ public:
     }
 
     ~ThreadPool() {
-        if(_data) {
+        if(auto data = _data) {
             {
-                std::lock_guard<std::mutex> _ { _data->_mutex};
-                _data->_stop = true;
+                std::lock_guard<std::mutex> _ { data->_mutex};
+                data->_stop = true;
             }
-            _data->_condition.notify_all();
+            data->_condition.notify_all();
         }
     }
 
@@ -23,8 +23,9 @@ public:
     void execute(Func &&functor, Args &&...args) {
         {
             std::lock_guard<std::mutex> _ { _data->_mutex};
-            _data->_tasks.emplace(LazyEvaluate::lazy(
-                std::forward<Func>(functor), std::forward<Args>(args)...));
+            // _data->_tasks.emplace(LazyEvaluate::lazy(
+            //     std::forward<Func>(functor), std::forward<Args>(args)...));
+            _data->_tasks.emplace([=] {functor(std::move(args)...)});
         }
         _data->_condition.notify_one();
     }
@@ -40,7 +41,7 @@ private:
                     auto task = std::move(data->_tasks.front());
                     data->_tasks.pop();
                     lock.unlock();
-                    task.evaluate();
+                    task();
                     lock.lock();
                 } else if(data->_stop) {
                     break;
@@ -55,7 +56,7 @@ private:
         std::mutex _mutex;
         std::condition_variable _condition;
         bool _stop {false};
-        std::queue<LazyEvaluate> _tasks;
+        std::queue<std::function<void()>> _tasks;
     };
     std::shared_ptr<Data> _data {std::make_shared<Data>()};
 
