@@ -41,7 +41,7 @@ private:
                     auto task = std::move(data->_tasks.front());
                     data->_tasks.pop();
                     lock.unlock();
-                    task();
+                    if(task) task(); // 需要判断callab
                     lock.lock();
                 } else if(data->_stop) {
                     break;

@@ -67,7 +67,7 @@ public:
 
 
     void handleRead() {
-        int n; // = buffer.read
+        int n = _ctx.inputBuffer.readFd(_ctx.acceptedSocket.fd());
         if(n > 0) {
             _messageCallback.evaluate();
         } else if(n == 0) {
@@ -78,7 +78,13 @@ public:
     }
 
     void handleWrite() {
-        int n; // = write
+        int n = _ctx.outputBuffer.writeFd(_ctx.acceptedSocket.fd());
+        if(n > 0) {
+            if(_ctx.outputBuffer.rest() == 0) {
+                _writeCompleteCallback.evaluate();
+            }
+            // TODO shutdown option
+        }
     }
     
     void handleError() {

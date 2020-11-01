@@ -12,7 +12,7 @@ public:
             Socket acceptedsocket, InetAddress localAddress, InetAddress peerAddress) {
         if(_container.size() > 128) updateReusableIndex();
         auto connection = std::make_unique<TcpHandler>(
-                _looperPool.pick().get(),  // TODO looperThread
+                _looperPool.pick().get(),
                 std::move(acceptedsocket), localAddress, peerAddress); 
         if(reusable()) {
             int pos = _reusableIndex++;

@@ -50,7 +50,7 @@ public:
 
     void listen() {
         _ctx.acceptSocket.listen();
-        // TODO _ctx.enableRead();
+        _ctx.enableRead();
     }
 
 protected:

@@ -1,5 +1,6 @@
 #ifndef __BUFFER_H__
 #define __BUFFER_H__
+#include <sys/uio.h>
 #include <bits/stdc++.h>
 #include "utils/Algorithms.h"
 // 一个简单的Socket IO Buffer
@@ -56,14 +57,15 @@ public:
 
     char* getReadBuffer() { return _buf.data() + _r; }
     char* getWriteBuffer() { return _buf.data() + _w; }
-    char* end() { return _buf.data() + _size; }
+    const char* end() { return _buf.data() + _size; }
 
     
 
     void append(const char *data, int size) {
         gc(size);
-        std::copy(data, data + size, getReadBuffer());
-        _r += size;
+        // std::copy(data, data + size, getWriteBuffer());
+        memcpy(getWriteBuffer(), data, size);
+        write(size);
     }
 
     // not a pointer
@@ -73,12 +75,48 @@ public:
     // append(T(&)[N])
 
 
+// syscall
+
+    int readFrom(int fd) {
+        char localBuffer[1<<16];
+        iovec vec[2];
+        int bufferLimit = limit();
+        vec[0].iov_base = getWriteBuffer();
+        vec[0].iov_len = bufferLimit;
+        vec[1].iov_base = localBuffer;
+        vec[1].iov_len = sizeof(localBuffer);
+        int n = ::readv(fd, vec, 2);
+        if(n > 0) {
+            if(n <= bufferLimit) {
+                write(n);
+            } else {
+                write(bufferLimit);
+                int localSize = n - bufferLimit;
+                append(localBuffer, localSize);
+            }
+        }
+        // n < 0 error
+        return n;
+    }
+
+    int writeTo(int fd) {
+        int n = ::write(fd, getReadBuffer(), rest());
+        read(n);
+        // n < 0 !EAGAIN throw
+        return n;
+    }
+
+
 };
 
 
 inline void Buffer::reuseIfPossible() {
     if(_r == _w) {
         clear();
+    }
+    int bufferRest = rest();
+    if(bufferRest < (_size >> 4) && bufferRest < 32) {
+        // TODO
     }
 }
 
