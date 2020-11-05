@@ -25,7 +25,7 @@ public:
             std::lock_guard<std::mutex> _ { _data->_mutex};
             // _data->_tasks.emplace(LazyEvaluate::lazy(
             //     std::forward<Func>(functor), std::forward<Args>(args)...));
-            _data->_tasks.emplace([=] {functor(std::move(args)...)});
+            _data->_tasks.emplace([=] {functor(std::move(args)...);});
         }
         _data->_condition.notify_one();
     }

@@ -25,6 +25,7 @@ public:
         return LazyEvaluate ([=] { functor(std::move(args)...); }); // C++14 [f = std::move(f)] {...} FIXME: use MoveWrapper
     }
     void evaluate() const { _functor(); }
+    void operator()() const { _functor(); }
     // void evaluateWithCheck() const { if(_functor) _functor(); } // 我寻思正常人应该没这种需求
 
 public:

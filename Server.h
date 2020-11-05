@@ -14,7 +14,7 @@
     template <typename Functor, typename ...Args> \
     void functionName(Functor &&functor, Args &&...args) { \
         callbackMember = LazyEvaluate::lazy(std::forward<Functor>(functor), std::forward<Args>(args)...); \
-        useCtxflag = false; \ 
+        useCtxFlag = false; \
     }
 
 #define SERVER_CALLBACK_WITH_CTX_DEFINE(functionName, callbackMember, ContextFunctorType, useCtxFlag) \
@@ -49,10 +49,10 @@ public:
     SERVER_CALLBACK_DEFINE(onWriteComplete, _writeCompleteCallback, _writeCompleteCallbackUseCtx);
     SERVER_CALLBACK_DEFINE(onClose,         _closeCallback, _closeCallbackUseCtx);
 
-    SERVER_CALLBACK_WITH_CTX_DEFINE(onConnection,    _connectionCallback, TcpHandler::ContextFunctor, _connectionCallbackUseCtx);
-    SERVER_CALLBACK_WITH_CTX_DEFINE(onMessage,       _messageCallback, TcpHandler::ContextFunctor, _messageCallbackUseCtx);
-    SERVER_CALLBACK_WITH_CTX_DEFINE(onWriteComplete, _writeCompleteCallback, TcpHandler::ContextFunctor, _writeCompleteCallbackUseCtx);
-    SERVER_CALLBACK_WITH_CTX_DEFINE(onClose,         _closeCallback, TcpHandler::ContextFunctor, _closeCallbackUseCtx);
+    SERVER_CALLBACK_WITH_CTX_DEFINE(onConnectionWithCtx,    _connectionCallback, TcpHandler::ContextFunctor, _connectionCallbackUseCtx);
+    SERVER_CALLBACK_WITH_CTX_DEFINE(onMessageWithCtx,       _messageCallback, TcpHandler::ContextFunctor, _messageCallbackUseCtx);
+    SERVER_CALLBACK_WITH_CTX_DEFINE(onWriteCompleteWithCtx, _writeCompleteCallback, TcpHandler::ContextFunctor, _writeCompleteCallbackUseCtx);
+    SERVER_CALLBACK_WITH_CTX_DEFINE(onCloseWithCtx,         _closeCallback, TcpHandler::ContextFunctor, _closeCallbackUseCtx);
     
 
 
