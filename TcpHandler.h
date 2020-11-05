@@ -67,7 +67,7 @@ public:
 
 
     void handleRead() {
-        int n = _ctx.inputBuffer.readFd(_ctx.acceptedSocket.fd());
+        int n = _ctx.inputBuffer.readFrom(_ctx.acceptedSocket.fd());
         if(n > 0) {
             _messageCallback.evaluate();
         } else if(n == 0) {
@@ -78,21 +78,21 @@ public:
     }
 
     void handleWrite() {
-        int n = _ctx.outputBuffer.writeFd(_ctx.acceptedSocket.fd());
+        int n = _ctx.outputBuffer.writeTo(_ctx.acceptedSocket.fd());
         if(n > 0) {
             if(_ctx.outputBuffer.rest() == 0) {
-                _writeCompleteCallback.evaluate();
+                _writeCompleteCallback.evaluate(); // shutdown
             }
             // TODO shutdown option
         }
     }
     
     void handleError() {
-        // throw
+        throw std::exception();
     }
 
     void handleClose() {
-        _connectionCallback.evaluate();
+        // _connectionCallback.evaluate(); // UNUSED
         _closeCallback.evaluate();
     }
 
