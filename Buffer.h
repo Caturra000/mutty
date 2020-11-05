@@ -1,6 +1,7 @@
 #ifndef __BUFFER_H__
 #define __BUFFER_H__
 #include <sys/uio.h>
+#include <unistd.h>
 #include <bits/stdc++.h>
 #include "utils/Algorithms.h"
 // 一个简单的Socket IO Buffer
@@ -12,15 +13,15 @@ public:
 private:
     std::vector<char> _buf;
     int _size;  // ==capacity
-    int _r, _w; // _r >= _w
+    int _r, _w; // _r <= _w
 
 public:
 
 // 大小接口
 
     int size() { return _size; }
-    int rest() { return _r - _w; }  // 还有多少未读取
-    int limit() { return _size - _r; } // 还有多少彻底填满
+    int rest() { return _w - _r; }  // 还有多少未读取
+    int limit() { return _size - _w; } // 还有多少彻底填满
     int freeSpace() { return _size - rest(); }
 
 // 扩容相关
@@ -121,10 +122,10 @@ inline void Buffer::reuseIfPossible() {
 }
 
 inline void Buffer::gc() {
-    if(_w > 0) {
-        // move [_w, _r] to front
-        memmove(_buf.data(), _buf.data() + _w, _r = rest());
-        _w = 0;
+    if(_r > 0) {
+        // move [_r, _w] to front
+        memmove(_buf.data(), _buf.data() + _r, _w = rest());
+        _r = 0;
     }
 }
 
