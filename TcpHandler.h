@@ -15,9 +15,7 @@ public:
 
 // Handler的日常
 
-
-
-    virtual void handle(Message msg) override {
+    void handle(Message msg) override {
         switch(msg.what) {
             case TcpContext::MSG_POLL_READ:
                 handleRead();
@@ -40,37 +38,25 @@ public:
 // Callback setter
 
     // usage:
-    //     handler.setOnConnectWithCtx([](TcpContext *ctx) { ctx->setXX(); });
+    //     handler.setOnConnect([](TcpContext *ctx) { ctx->setXX(); });
     //     handler.setOnConnect(func, arg0, arg1, arg2);
 
-    HANDLER_CALLBACK_DEFINE(onConnect,       _connectionCallback)
-    HANDLER_CALLBACK_DEFINE(onMessage,       _messageCallback)
-    HANDLER_CALLBACK_DEFINE(onWriteComplete, _writeCompleteCallback)
-    HANDLER_CALLBACK_DEFINE(onClose,         _closeCallback)
-
-
-
     using ContextFunctor = std::function<void(TcpContext*)>;
-    void onConnectWithCtx(ContextFunctor functor) { // 由于重载决议的坑，目前先这么用着
-        onConnect(std::move(functor), &_ctx);
-        // _connectionCallback = _ctx->binder(std::move(functor)); // 不必每个Context都提供这么不可描述的接口
-    }
+    HANDLER_CALLBACK_DEFINE(onConnect,       _connectionCallback,    ContextFunctor, &_ctx)
+    HANDLER_CALLBACK_DEFINE(onMessage,       _messageCallback,       ContextFunctor, &_ctx)
+    HANDLER_CALLBACK_DEFINE(onWriteComplete, _writeCompleteCallback, ContextFunctor, &_ctx)
+    HANDLER_CALLBACK_DEFINE(onClose,         _closeCallback,         ContextFunctor, &_ctx)
+
     // TODO onConnectionWithWeakCtx(std::weak_ptr<...> ctx) 提供弱回调支持
-    // FIXME: 类型推导时，[](ctx*)会选择HANDLER_CALLBACK_DEFINE，如何让其失败而非错误
+
 
 // 用于外部定义的函数
-
-    void onMessageWithCtx(ContextFunctor functor) { onMessage(std::move(functor), &_ctx); }
-    void onWriteCompleteWithCtx(ContextFunctor functor) { onWriteComplete(std::move(functor), &_ctx); }
-    void onCloseWithCtx(ContextFunctor functor) { onClose(std::move(functor), &_ctx); }
-
-
 
     void handleRead() {
         int n = _ctx.inputBuffer.readFrom(_ctx.acceptedSocket.fd());
         if(n > 0) {
             _messageCallback.evaluate();
-        } else if(n == 0) {
+        } else if(n == 0) { // FIN
             handleClose();
         } else {
             handleError();
@@ -81,6 +67,7 @@ public:
         int n = _ctx.outputBuffer.writeTo(_ctx.acceptedSocket.fd());
         if(n > 0) {
             if(_ctx.outputBuffer.rest() == 0) {
+                _ctx.disableWrite();
                 _writeCompleteCallback.evaluate(); // shutdown
             }
             // TODO shutdown option
@@ -92,6 +79,8 @@ public:
     }
 
     void handleClose() {
+        _ctx.disableRead();
+        _ctx.disableWrite();
         // _connectionCallback.evaluate(); // UNUSED
         _closeCallback.evaluate();
     }
@@ -102,11 +91,12 @@ public:
         : _ctx(this, looper, std::move(acceptedSocket), localAddress, peerAddress) { }
 
 protected:
-    TcpContext _ctx;
+    TcpContext _ctx; // TODO 改为shared_ptr，且enable shared from this
 
     LazyEvaluate _connectionCallback;
     LazyEvaluate _messageCallback;
     LazyEvaluate _writeCompleteCallback;
     LazyEvaluate _closeCallback;
 };
+
 #endif

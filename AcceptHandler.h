@@ -38,11 +38,9 @@ public:
 
     // onNewConnection注册时，context的exchanger携带连接信息，如果不处理将会某个时刻自行析构
 
-    HANDLER_CALLBACK_DEFINE(onNewConnection, _newConnectionCallback)
     using ContextFunctor = std::function<void(AcceptContext*)>;
-    void onNewConnectionWithCtx(ContextFunctor functor) { 
-        onNewConnection(std::move(functor), &_ctx);
-    }
+    HANDLER_CALLBACK_DEFINE(onNewConnection, _newConnectionCallback, ContextFunctor, &_ctx)
+
 
     AcceptHandler(Looper *looper, InetAddress localAddress)
         : _ctx(this, looper, localAddress) {} // TODO bind listen

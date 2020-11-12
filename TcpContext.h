@@ -41,6 +41,7 @@ public:
     LazyEvaluate binder(std::function<void(TcpContext*)> functor) {
         return LazyEvaluate::lazy(std::move(functor), this);
     }
+    
 
 // ONLY FOR POLLER
 

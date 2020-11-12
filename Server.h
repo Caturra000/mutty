@@ -39,7 +39,7 @@ public:
     }
 
     void onNewConnectionWithCtx(AcceptHandler::ContextFunctor functor) {
-        _acceptor.onNewConnectionWithCtx(std::move(functor));
+        _acceptor.onNewConnection(std::move(functor));
     }
 
 // Tcp交互接口
@@ -57,7 +57,7 @@ public:
 
 
     void start() {
-         _acceptor.onNewConnectionWithCtx([this](AcceptContext *ctx) {
+         _acceptor.onNewConnection([this](AcceptContext *ctx) {
             auto connectionInfo = std::move(cast<
                 std::pair<Socket, InetAddress>&>(ctx->exchanger));
             Socket &connectionSocket = connectionInfo.first;
@@ -99,25 +99,25 @@ private:
 inline void Server::tcpCallbackInit(TcpHandler *_connection) {
     // FIXME: 由于tcpCtx的this没法提前拿到手，所以目前实现有点别扭
     if(_connectionCallbackUseCtx) {
-        _connection->onConnectWithCtx(cast<TcpHandler::ContextFunctor>(_connectionCallback));
+        _connection->onConnect(cast<TcpHandler::ContextFunctor>(_connectionCallback));
     } else {
         _connection->onConnect(cast<LazyEvaluate>(_connectionCallback));
     }
 
     if(_messageCallbackUseCtx) {
-        _connection->onMessageWithCtx(cast<TcpHandler::ContextFunctor>(_messageCallback));
+        _connection->onMessage(cast<TcpHandler::ContextFunctor>(_messageCallback));
     } else {
         _connection->onMessage(cast<LazyEvaluate>(_messageCallback));
     }
 
     if(_writeCompleteCallbackUseCtx) {
-        _connection->onWriteCompleteWithCtx(cast<TcpHandler::ContextFunctor>(_writeCompleteCallback));
+        _connection->onWriteComplete(cast<TcpHandler::ContextFunctor>(_writeCompleteCallback));
     } else {
         _connection->onWriteComplete(cast<LazyEvaluate>(_writeCompleteCallback));
     }
 
     if(_closeCallbackUseCtx) {
-        _connection->onCloseWithCtx(cast<TcpHandler::ContextFunctor>(_closeCallback));
+        _connection->onClose(cast<TcpHandler::ContextFunctor>(_closeCallback));
     } else {
         _connection->onClose(cast<LazyEvaluate>(_closeCallback));
     }
