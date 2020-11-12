@@ -18,4 +18,6 @@ inline constexpr auto isCallable(F &&f, Args &&...args)
     return nullptr;
 }
 
+template<typename ...Args>
+using isCallableType = decltype(isCallable<Args...>);
 #endif
