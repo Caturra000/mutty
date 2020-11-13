@@ -30,6 +30,7 @@ private:
 
 class BufferPool {
 public:
+    // TODO 用于TcpCtx的构造
     CachedBuffer obtain(int sizeHint = 128) { // FIXME: 不允许有0大小的buffer
         int n = findCeilOfPowerOfTwo(sizeHint);
         if(!_pool[n].empty()) {
