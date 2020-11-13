@@ -12,7 +12,7 @@ public:
     template <typename Func, typename ...Args>
     static LazyEvaluate lazy(Func &&functor, Args &&...args) {
         // return LazyEvaluate( std::bind(std::forward<Func>(functor), std::forward<Args>(args)...) );
-        return LazyEvaluate ([=] { functor(std::move(args)...); }); // C++14 [f = std::move(f)] {...} FIXME: use MoveWrapper
+        return LazyEvaluate ([functor, ...args2 = std::forward<Args>(args)] { functor(std::forward<decltype(args2)>(args2)...); }); // C++14 [f = std::move(f)] {...} FIXME: use MoveWrapper
     }
     void evaluate() const { _functor(); }
     void operator()() const { _functor(); }
