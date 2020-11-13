@@ -1,6 +1,7 @@
 #ifndef __CONNECTION_POOL_H__
 #define __CONNECTION_POOL_H__
 #include <bits/stdc++.h>
+#include "utils/Compat.h"
 #include "TcpHandler.h"
 #include "LooperPool.h"
 // 用于为Server提供Connection容器
@@ -11,7 +12,7 @@ public:
     std::unique_ptr<TcpHandler>& createNewConnection(
             Socket acceptedsocket, InetAddress localAddress, InetAddress peerAddress) {
         if(_container.size() > 128) updateReusableIndex();
-        auto connection = std::make_unique<TcpHandler>(
+        auto connection = cpp11::make_unique<TcpHandler>(
                 _looperPool.pick().get(),
                 std::move(acceptedsocket), localAddress, peerAddress); 
         if(reusable()) {

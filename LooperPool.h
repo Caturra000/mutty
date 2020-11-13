@@ -3,6 +3,7 @@
 #include <bits/stdc++.h>
 #include "utils/Algorithms.h"
 #include "utils/ThreadPool.h"
+#include "utils/Compat.h"
 #include "Looper.h"
 
 // 具体用途是每次accept都分配到固定大小的Looper池中
@@ -18,7 +19,7 @@ public:
         constexpr size_t mayBeZero = N & N-1;
         static_assert(mayBeZero == 0, "N must be power of two.");
         for(auto &looper : _pool) {
-            looper = std::make_unique<Looper>();
+            looper = cpp11::make_unique<Looper>();
             _threads.execute([&] {looper->loop();});
         }
     }

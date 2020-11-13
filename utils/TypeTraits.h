@@ -19,5 +19,5 @@ inline constexpr auto isCallable(F &&f, Args &&...args)
 }
 
 template<typename ...Args>
-using isCallableType = decltype(isCallable<Args...>);
+using IsCallableType = decltype(isCallable<Args...>);
 #endif

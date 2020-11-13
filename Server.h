@@ -4,6 +4,7 @@
 #include "utils/Pointer.h"
 #include "utils/Exchanger.h"
 #include "utils/Object.h"
+#include "utils/TypeTraits.h"
 #include "Looper.h"
 #include "MessageQueue.h"
 #include "AcceptHandler.h"
@@ -11,14 +12,14 @@
 #include "TcpHandler.h"
 
 #define SERVER_CALLBACK_DEFINE(functionName, callbackMember, useCtxFlag) \
-    template <typename Functor, typename ...Args> \
-    void functionName(Functor &&functor, Args &&...args) { \
-        callbackMember = LazyEvaluate::lazy(std::forward<Functor>(functor), std::forward<Args>(args)...); \
+    template <typename ...Args, typename = IsCallableType<Args...>> \
+    void functionName(Args &&...args) { \
+        callbackMember = LazyEvaluate::lazy(std::forward<Args>(args)...); \
         useCtxFlag = false; \
     }
 
 #define SERVER_CALLBACK_WITH_CTX_DEFINE(functionName, callbackMember, ContextFunctorType, useCtxFlag) \
-    void functionName(ContextFunctorType functor) { \
+    void functionName(ContextFunctorType &&functor) { \
         callbackMember = std::move(functor); \
         useCtxFlag = true; \
     }
@@ -33,26 +34,26 @@ public:
 
 // 定制接口，onNewConnection已有默认实现
 
-    template <typename Functor, typename ...Args>
+    template <typename Functor, typename ...Args, typename = IsCallableType<Functor, Args...>>
     void onNewConnection(Functor &&functor, Args &&...args) {
         _acceptor.onNewConnection(std::forward<Functor>(functor), std::forward<Args>(args)...);
     }
 
-    void onNewConnectionWithCtx(AcceptHandler::ContextFunctor functor) {
+    void onNewConnection(AcceptHandler::ContextFunctor functor) {
         _acceptor.onNewConnection(std::move(functor));
     }
 
 // Tcp交互接口
 
-    SERVER_CALLBACK_DEFINE(onConnection,    _connectionCallback, _connectionCallbackUseCtx);
+    SERVER_CALLBACK_DEFINE(onConnect,    _connectionCallback, _connectionCallbackUseCtx);
     SERVER_CALLBACK_DEFINE(onMessage,       _messageCallback, _messageCallbackUseCtx);
     SERVER_CALLBACK_DEFINE(onWriteComplete, _writeCompleteCallback, _writeCompleteCallbackUseCtx);
     SERVER_CALLBACK_DEFINE(onClose,         _closeCallback, _closeCallbackUseCtx);
 
-    SERVER_CALLBACK_WITH_CTX_DEFINE(onConnectionWithCtx,    _connectionCallback, TcpHandler::ContextFunctor, _connectionCallbackUseCtx);
-    SERVER_CALLBACK_WITH_CTX_DEFINE(onMessageWithCtx,       _messageCallback, TcpHandler::ContextFunctor, _messageCallbackUseCtx);
-    SERVER_CALLBACK_WITH_CTX_DEFINE(onWriteCompleteWithCtx, _writeCompleteCallback, TcpHandler::ContextFunctor, _writeCompleteCallbackUseCtx);
-    SERVER_CALLBACK_WITH_CTX_DEFINE(onCloseWithCtx,         _closeCallback, TcpHandler::ContextFunctor, _closeCallbackUseCtx);
+    SERVER_CALLBACK_WITH_CTX_DEFINE(onConnect,    _connectionCallback, TcpHandler::ContextFunctor, _connectionCallbackUseCtx);
+    SERVER_CALLBACK_WITH_CTX_DEFINE(onMessage,       _messageCallback, TcpHandler::ContextFunctor, _messageCallbackUseCtx);
+    SERVER_CALLBACK_WITH_CTX_DEFINE(onWriteComplete, _writeCompleteCallback, TcpHandler::ContextFunctor, _writeCompleteCallbackUseCtx);
+    SERVER_CALLBACK_WITH_CTX_DEFINE(onClose,         _closeCallback, TcpHandler::ContextFunctor, _closeCallbackUseCtx);
     
 
 

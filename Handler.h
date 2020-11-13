@@ -7,11 +7,11 @@
 #include "Message.h"
 
 #define HANDLER_CALLBACK_DEFINE(functionName, callbackMember, CtxFunctorType, bindedCtx) \
-    template <typename ...Args, typename = isCallableType<Args...>> \
+    template <typename ...Args, typename = IsCallableType<Args...>> \
     void functionName(Args &&...args) { \
         callbackMember = LazyEvaluate::lazy(std::forward<Args>(args)...); \
     } \
-    void functionName(CtxFunctorType &&ctxFunctor) { \
+    void functionName(CtxFunctorType ctxFunctor) { \
         callbackMember = LazyEvaluate::lazy(std::move(ctxFunctor), bindedCtx); \
     } 
 

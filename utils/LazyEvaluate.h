@@ -1,8 +1,6 @@
 #ifndef __UTILS_LAZY_EVALUATE_H__
 #define __UTILS_LAZY_EVALUATE_H__
 #include <bits/stdc++.h>
-#include "Noncopyable.h"
-
 
 // @brief: a wrapper of std::function, mainly used for callback
 // @usage:
@@ -15,8 +13,8 @@ public:
     // IMPROVEMENT: 通过template实现默认返回unique，但是可以通过<shared_ptr>返回一个shared_ptr
     template <typename Func, typename ...Args>
     static std::unique_ptr<LazyEvaluate> make(Func &&functor, Args &&...args) {
-        return std::make_unique<LazyEvaluate>(
-            lazy(std::forward<Func>(functor), std::forward<Args>(args)...));
+        return std::unique_ptr<LazyEvaluate>( new LazyEvaluate (
+            lazy(std::forward<Func>(functor), std::forward<Args>(args)...)));
     }
 
     template <typename Func, typename ...Args>
