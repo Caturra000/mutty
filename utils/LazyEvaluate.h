@@ -9,14 +9,6 @@
 //     callback.evaluate();
 class LazyEvaluate {
 public:
-    // smart pointer wrapper
-    // IMPROVEMENT: 通过template实现默认返回unique，但是可以通过<shared_ptr>返回一个shared_ptr
-    template <typename Func, typename ...Args>
-    static std::unique_ptr<LazyEvaluate> make(Func &&functor, Args &&...args) {
-        return std::unique_ptr<LazyEvaluate>( new LazyEvaluate (
-            lazy(std::forward<Func>(functor), std::forward<Args>(args)...)));
-    }
-
     template <typename Func, typename ...Args>
     static LazyEvaluate lazy(Func &&functor, Args &&...args) {
         // return LazyEvaluate( std::bind(std::forward<Func>(functor), std::forward<Args>(args)...) );
