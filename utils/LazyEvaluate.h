@@ -11,15 +11,13 @@ class LazyEvaluate {
 public:
     template <typename Func, typename ...Args>
     static LazyEvaluate lazy(Func &&functor, Args &&...args) {
-        // return LazyEvaluate( std::bind(std::forward<Func>(functor), std::forward<Args>(args)...) );
-        return LazyEvaluate ([functor, ...args2 = std::forward<Args>(args)] { functor(std::forward<decltype(args2)>(args2)...); }); // C++14 [f = std::move(f)] {...} FIXME: use MoveWrapper
+        return LazyEvaluate([=]{functor(std::move(args)...);});
     }
     void evaluate() const { _functor(); }
     void operator()() const { _functor(); }
-    // void evaluateWithCheck() const { if(_functor) _functor(); } // 我寻思正常人应该没这种需求
 
 public:
-    LazyEvaluate() : _functor([]{}) { } // 提供空实现，避免check，也防止类设计时需要手动提供默认functor
+    LazyEvaluate() : _functor([]{}) { }
     
 protected:
     using Functor = std::function<void()>;
