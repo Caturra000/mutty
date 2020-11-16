@@ -28,8 +28,8 @@ public:
     // UNUSED who
     void handleRead(int who = 0) {
         InetAddress peerAddress;
-        Socket connectSocket = _ctx.acceptSocket.accept(peerAddress);
-        _ctx.exchanger = std::pair<Socket, InetAddress>(
+        Socket connectSocket = _ctx->acceptSocket.accept(peerAddress);
+        _ctx->exchanger = std::pair<Socket, InetAddress>(
             std::move(connectSocket), std::move(peerAddress));
         _newConnectionCallback.evaluate(); // add to ConnectionPool of Server
     }
@@ -37,20 +37,20 @@ public:
 // callback定义
 
     // onNewConnection注册时，context的exchanger携带连接信息，如果不处理将会某个时刻自行析构
-    HANDLER_CALLBACK_DEFINE(onNewConnection, _newConnectionCallback, AcceptContext, &_ctx)
+    HANDLER_CALLBACK_DEFINE(onNewConnection, _newConnectionCallback, AcceptContext, _ctx)
 
 
     AcceptHandler(Looper *looper, InetAddress localAddress)
-        : _ctx(this, looper, localAddress) {} // TODO bind listen
+        : _ctx(std::make_shared<AcceptContext>(this, looper, localAddress)) {} // TODO bind listen
 
 
     void listen() {
-        _ctx.acceptSocket.listen();
-        _ctx.enableRead();
+        _ctx->acceptSocket.listen();
+        _ctx->enableRead();
     }
 
 protected:
-    AcceptContext _ctx;
+    std::shared_ptr<AcceptContext> _ctx;
 
     LazyEvaluate _newConnectionCallback;
 };

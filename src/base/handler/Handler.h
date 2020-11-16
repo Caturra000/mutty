@@ -6,20 +6,21 @@
 #include "utils/TypeTraits.h"
 #include "Message.h"
 
-#define HANDLER_CALLBACK_DEFINE(functionName, callbackMember, ContextType, ContextPtr) \
+#define HANDLER_CALLBACK_DEFINE(functionName, callbackMember, ContextType, contextMember) \
+    /* non-context */ \
     template <typename ...Args, typename = IsCallableType<Args...>> \
     void functionName(Args &&...args) { \
         callbackMember = LazyEvaluate::lazy(std::forward<Args>(args)...); \
     } \
+    /* simple context */ \
     void functionName(std::function<void(ContextType*)> &&ctxFunctor) { \
         callbackMember = LazyEvaluate::lazy( \
-            std::forward<std::function<void(ContextType*)>>(ctxFunctor), ContextPtr); \
-    }
-
-#define HANDLER_WEAK_CALLBACK_DEFINE(functionName, callbackMember, ContextType, sharedFrom) \
+            std::forward<std::function<void(ContextType*)>>(ctxFunctor), contextMember.get()); \
+    } \
+    /* safe for lifecycle */ \
     void functionName(std::function<void(std::weak_ptr<ContextType>)> &&ctxFunctor) { \
         callbackMember = LazyEvaluate::lazy( \
-            std::forward<std::function<void(std::weak_ptr<ContextType>)>>(ctxFunctor), sharedFrom); \
+            std::forward<std::function<void(std::weak_ptr<ContextType>)>>(ctxFunctor), contextMember); \
     }
 
 class Handler {

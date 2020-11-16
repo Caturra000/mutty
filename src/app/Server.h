@@ -45,6 +45,8 @@ public:
 
 // Tcp交互接口
 
+    // TODO 简化macro，并提供weak callback支持
+
     SERVER_CALLBACK_DEFINE(onConnect,    _connectionCallback, _connectionCallbackUseCtx);
     SERVER_CALLBACK_DEFINE(onMessage,       _messageCallback, _messageCallbackUseCtx);
     SERVER_CALLBACK_DEFINE(onWriteComplete, _writeCompleteCallback, _writeCompleteCallbackUseCtx);
