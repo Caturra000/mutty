@@ -3,3 +3,5 @@ main
 .vscode
 archived
 docs
+build
+CMakeLists.txt

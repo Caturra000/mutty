@@ -3,8 +3,8 @@
 #include "utils/Pointer.h"
 #include "utils/Exchanger.h"
 #include "ContextImpl.h"
-#include "Socket.h"
-#include "InetAddress.h"
+#include "net/Socket.h"
+#include "net/InetAddress.h"
 class Handler;
 class AcceptContext: public ContextImpl {
 public:

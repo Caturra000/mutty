@@ -4,9 +4,9 @@
 #include "utils/LazyEvaluate.h"
 #include "utils/Pointer.h"
 #include "utils/Timestamp.h"
-#include "Handler.h"
-#include "Message.h"
-#include "MessageQueue.h"
+#include "handler/Handler.h"
+#include "handler/Message.h"
+#include "handler/MessageQueue.h"
 #include "Multiplexer.h"
 #include "Timer.h"
 class Looper {

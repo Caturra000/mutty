@@ -1,13 +1,13 @@
 #ifndef __TCP_CONTEXT_H__
 #define __TCP_CONTEXT_H__
 #include <bits/stdc++.h>
-#include "Socket.h"
-#include "InetAddress.h"
+#include "net/Socket.h"
+#include "net/InetAddress.h"
 #include "Buffer.h"
 #include "BufferPool.h"
 #include "Timer.h"
-#include "Message.h"
-#include "MessageQueue.h"
+#include "handler/Message.h"
+#include "handler/MessageQueue.h"
 #include "utils/LazyEvaluate.h"
 #include "utils/Pointer.h"
 #include "ContextImpl.h"
