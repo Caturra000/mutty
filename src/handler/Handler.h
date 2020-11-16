@@ -11,8 +11,8 @@
     void functionName(Args &&...args) { \
         callbackMember = LazyEvaluate::lazy(std::forward<Args>(args)...); \
     } \
-    void functionName(CtxFunctorType ctxFunctor) { \
-        callbackMember = LazyEvaluate::lazy(std::move(ctxFunctor), bindedCtx); \
+    void functionName(CtxFunctorType &&ctxFunctor) { \
+        callbackMember = LazyEvaluate::lazy(std::forward<CtxFunctorType>(ctxFunctor), bindedCtx); \
     } 
 
 class Handler {

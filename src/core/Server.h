@@ -20,7 +20,7 @@
 
 #define SERVER_CALLBACK_WITH_CTX_DEFINE(functionName, callbackMember, ContextFunctorType, useCtxFlag) \
     void functionName(ContextFunctorType &&functor) { \
-        callbackMember = std::move(functor); \
+        callbackMember = std::forward<ContextFunctorType>(functor); \
         useCtxFlag = true; \
     }
 
