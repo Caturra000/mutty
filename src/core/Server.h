@@ -39,7 +39,7 @@ public:
         _acceptor.onNewConnection(std::forward<Functor>(functor), std::forward<Args>(args)...);
     }
 
-    void onNewConnection(AcceptHandler::ContextFunctor functor) {
+    void onNewConnection(std::function<void(AcceptContext*)> functor) {
         _acceptor.onNewConnection(std::move(functor));
     }
 
