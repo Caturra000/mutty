@@ -41,11 +41,10 @@ public:
     //     handler.setOnConnect([](TcpContext *ctx) { ctx->setXX(); });
     //     handler.setOnConnect(func, arg0, arg1, arg2);
 
-    HANDLER_CALLBACK_DEFINE(onConnect,       _connectionCallback,    TcpContext, _ctx.get())
-    HANDLER_WEAK_CALLBACK_DEFINE(onConnect, _connectionCallback, TcpContext, _ctx)
-    HANDLER_CALLBACK_DEFINE(onMessage,       _messageCallback,       TcpContext, _ctx.get())
-    HANDLER_CALLBACK_DEFINE(onWriteComplete, _writeCompleteCallback, TcpContext, _ctx.get())
-    HANDLER_CALLBACK_DEFINE(onClose,         _closeCallback,         TcpContext, _ctx.get())
+    HANDLER_CALLBACK_DEFINE(onConnect,       _connectionCallback,    TcpContext, _ctx)
+    HANDLER_CALLBACK_DEFINE(onMessage,       _messageCallback,       TcpContext, _ctx)
+    HANDLER_CALLBACK_DEFINE(onWriteComplete, _writeCompleteCallback, TcpContext, _ctx)
+    HANDLER_CALLBACK_DEFINE(onClose,         _closeCallback,         TcpContext, _ctx)
     using ContextFunctor = std::function<void(TcpContext*)>;
     // TODO onConnectionWithWeakCtx(std::weak_ptr<...> ctx) 提供弱回调支持
 
