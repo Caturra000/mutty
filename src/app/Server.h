@@ -95,10 +95,18 @@ private:
     bool _closeCallbackUseCtx {false};
      
 
+    // TODO 明天写，太晚了
+    template <typename T>
+    struct Policy {
+        Object *runtimeInfo;
+        TcpHandler *connection;
+        void onConnect(T &&info)
+            { connection->onConnect();}
+    } ;
 
 };
 
-
+// TODO 通过Policy来解决这种垃圾分类
 inline void Server::tcpCallbackInit(TcpHandler *_connection) {
     // FIXME: 由于tcpCtx的this没法提前拿到手，所以目前实现有点别扭
     if(_connectionCallbackUseCtx) {
