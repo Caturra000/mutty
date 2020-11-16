@@ -4,11 +4,12 @@
 #include "utils/LazyEvaluate.h"
 #include "utils/Pointer.h"
 #include "utils/Timestamp.h"
-#include "handler/Handler.h"
-#include "handler/Message.h"
-#include "handler/MessageQueue.h"
+#include "base/handler/Handler.h"
+#include "base/handler/Message.h"
+#include "base/handler/MessageQueue.h"
+#include "base/timer/Timer.h"
 #include "Multiplexer.h"
-#include "Timer.h"
+
 class Looper {
 public:
     void loop() {

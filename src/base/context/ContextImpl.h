@@ -3,11 +3,11 @@
 #include <poll.h>
 #include <bits/stdc++.h>
 #include "Context.h"
-#include "handler/MessageQueue.h"
-#include "handler/Message.h"
+#include "base/handler/MessageQueue.h"
+#include "base/handler/Message.h"
 #include "utils/Pointer.h"
-#include "Looper.h"
-#include "Multiplexer.h"
+#include "core/Looper.h"
+#include "core/Multiplexer.h"
 
 class Handler;
 

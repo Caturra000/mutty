@@ -5,7 +5,7 @@
 #include "utils/Exchanger.h"
 #include "utils/Object.h"
 #include "utils/TypeTraits.h"
-#include "handler/MessageQueue.h"
+#include "base/handler/MessageQueue.h"
 #include "core/Looper.h"
 #include "core/AcceptHandler.h"
 #include "core/ConnectionPool.h"
