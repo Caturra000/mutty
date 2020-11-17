@@ -35,9 +35,9 @@ split(const std::string &str, const char pivot = ' ') {
     return split(str.c_str(), str.length(), pivot);
 }
 
-template<typename T, 
-         typename std::enable_if<std::is_integral<T>::value>::type* = nullptr> // check
+template<typename T>
 T toDec(const std::string &str) {
+    static_assert(std::is_integral<T>::value, "T must be integral");
     T dec = 0;
     for(auto c : str) {
         dec = dec*10 + (c - '0');
