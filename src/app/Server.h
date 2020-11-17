@@ -37,22 +37,6 @@ public:
        
     }
 
-// 定制接口，onNewConnection已有默认实现
-
-    template <typename Functor, typename ...Args, typename = IsCallableType<Functor, Args...>>
-    void onNewConnection(Functor &&functor, Args &&...args) {
-        _acceptor.onNewConnection(std::forward<Functor>(functor), std::forward<Args>(args)...);
-    }
-
-    void onNewConnection(std::function<void(AcceptContext*)> functor) {
-        _acceptor.onNewConnection(std::move(functor));
-    }
-
-    void onNewConnection(std::function<void(std::weak_ptr<AcceptContext>)> functor) {
-        _acceptor.onNewConnection(std::move(functor));
-    }
-
-
     // 二阶段构造，在start()前应处理好tcpHandler的回调注册
     void start() {
          _acceptor.onNewConnection([this](std::weak_ptr<AcceptContext> context) {
