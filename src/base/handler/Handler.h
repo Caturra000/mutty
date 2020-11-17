@@ -13,14 +13,14 @@
         callbackMember = LazyEvaluate::lazy(std::forward<Args>(args)...); \
     } \
     /* simple context */ \
-    void functionName(std::function<void(ContextType*)> &&ctxFunctor) { \
+    void functionName(std::function<void(ContextType*)> ctxFunctor) { \
         callbackMember = LazyEvaluate::lazy( \
-            std::forward<std::function<void(ContextType*)>>(ctxFunctor), contextMember.get()); \
+            std::move(ctxFunctor), contextMember.get()); \
     } \
     /* safe for lifecycle */ \
-    void functionName(std::function<void(std::weak_ptr<ContextType>)> &&ctxFunctor) { \
+    void functionName(std::function<void(std::weak_ptr<ContextType>)> ctxFunctor) { \
         callbackMember = LazyEvaluate::lazy( \
-            std::forward<std::function<void(std::weak_ptr<ContextType>)>>(ctxFunctor), contextMember); \
+            std::move(ctxFunctor), contextMember); \
     }
 
 class Handler {
