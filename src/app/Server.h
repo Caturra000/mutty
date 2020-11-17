@@ -5,6 +5,7 @@
 #include "utils/Exchanger.h"
 #include "utils/Object.h"
 #include "utils/TypeTraits.h"
+#include "utils/Compat.h"
 #include "base/handler/MessageQueue.h"
 #include "core/Looper.h"
 #include "core/AcceptHandler.h"
@@ -93,22 +94,59 @@ private:
     bool _messageCallbackUseCtx {false};
     bool _writeCompleteCallbackUseCtx {false};
     bool _closeCallbackUseCtx {false};
-     
 
-    // TODO 明天写，太晚了
+    struct PolicyBase {
+        //virtual void setHandler(TcpHandler*) = 0;
+        virtual void onConnect(TcpHandler*) = 0;
+        virtual void onMessage(TcpHandler*) = 0;
+        virtual void onWriteComplete(TcpHandler*) = 0;
+        virtual void onClose(TcpHandler*) = 0;
+        virtual ~PolicyBase() { }
+    };
+
+    std::unique_ptr<PolicyBase> _connectPolicy;
+    std::unique_ptr<PolicyBase> _messagePolicy;
+    std::unique_ptr<PolicyBase> _writeCompletePolicy;
+    std::unique_ptr<PolicyBase> _closePolicy;
+
     template <typename T>
-    struct Policy {
-        Object *runtimeInfo;
-        TcpHandler *connection;
-        void onConnect(T &&info)
-            { connection->onConnect();}
+    struct Policy: public PolicyBase {
+        //using DecayT = typename std::decay<T>::type;
+        T runtimeInfo;
+        Policy(T info): runtimeInfo(std::move(info)) {}
+        void onConnect(TcpHandler *connection) override
+            { connection->onConnect(std::move(runtimeInfo));} // call once
+        void onMessage(TcpHandler *connection) override
+            { connection->onMessage(std::move(runtimeInfo));}
+        void onWriteComplete(TcpHandler *connection) override
+            { connection->onWriteComplete(std::move(runtimeInfo));}
+        void onClose(TcpHandler *connection) override
+            { connection->onClose(std::move(runtimeInfo));} 
     } ;
+public:
+// experimental
+
+    template <typename ...Args, typename = IsCallableType<Args...>>
+    void onConnect000(Args &&...args) {
+        _connectPolicy = cpp11::make_unique<Policy<LazyEvaluate>>(
+            LazyEvaluate::lazy(std::forward<Args>(args)...));
+    }
+    void onConnect000(std::function<void(TcpContext*)> functor) {
+        using TLDR = std::function<void(TcpContext*)>;
+        _connectPolicy = cpp11::make_unique<Policy<TLDR>>(std::move(functor));
+    }
+    void onConnect000(std::function<void(std::weak_ptr<TcpContext>)> functor) {
+        using TLDR = std::function<void(std::weak_ptr<TcpContext>)>;
+        _connectPolicy = cpp11::make_unique<Policy<TLDR>>(std::move(functor));
+    }
 
 };
 
 // TODO 通过Policy来解决这种垃圾分类
 inline void Server::tcpCallbackInit(TcpHandler *_connection) {
     // FIXME: 由于tcpCtx的this没法提前拿到手，所以目前实现有点别扭
+    if(_connectPolicy) _connectPolicy->onConnect(_connection);
+
     if(_connectionCallbackUseCtx) {
         _connection->onConnect(cast<TcpHandler::ContextFunctor>(_connectionCallback));
     } else {
