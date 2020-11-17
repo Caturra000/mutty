@@ -48,16 +48,23 @@ public:
         _acceptor.onNewConnection(std::move(functor));
     }
 
+    void onNewConnection(std::function<void(std::weak_ptr<AcceptContext>)> functor) {
+        _acceptor.onNewConnection(std::move(functor));
+    }
 
+
+    // 二阶段构造，在start()前应处理好tcpHandler的回调注册
     void start() {
-         _acceptor.onNewConnection([this](AcceptContext *ctx) {
-            auto connectionInfo = std::move(cast<
-                std::pair<Socket, InetAddress>&>(ctx->exchanger));
-            Socket &connectionSocket = connectionInfo.first;
-            InetAddress &peerAddress = connectionInfo.second;
-            auto &connection = _connections.createNewConnection(
-                std::move(connectionSocket), ctx->localAddress, peerAddress);
-            tcpCallbackInit(connection.get());
+         _acceptor.onNewConnection([this](std::weak_ptr<AcceptContext> context) {
+            if(auto ctx = context.lock()) {
+                auto connectionInfo = std::move(cast<
+                    std::pair<Socket, InetAddress>&>(ctx->exchanger));
+                Socket &connectionSocket = connectionInfo.first;
+                InetAddress &peerAddress = connectionInfo.second;
+                auto &connection = _connections.createNewConnection(
+                    std::move(connectionSocket), ctx->localAddress, peerAddress);
+                tcpCallbackInit(connection.get());
+            }
         });
     }
 
@@ -65,11 +72,6 @@ public:
 private:
     void tcpCallbackInit(TcpHandler*);
 
-
-private:
-    Pointer<Looper> _looper;
-    AcceptHandler _acceptor;
-    ConnectionPool _connections;
 
 // for TcpHandler
 
@@ -106,12 +108,17 @@ private:
     } ;
 public:
 
+// server回调注册接口
+
     POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy, TcpContext)
     POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy, TcpContext)
     POLICY_CALLBACK_DEFINE(onWriteComplete, _writeCompletePolicy, TcpContext)
     POLICY_CALLBACK_DEFINE(onClose, _closePolicy, TcpContext)
-    
 
+private:
+    Pointer<Looper> _looper;
+    AcceptHandler _acceptor;
+    ConnectionPool _connections;
 };
 
 inline void Server::tcpCallbackInit(TcpHandler *connection) {
