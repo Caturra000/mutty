@@ -11,7 +11,11 @@ class LazyEvaluate {
 public:
     template <typename Func, typename ...Args>
     static LazyEvaluate lazy(Func &&functor, Args &&...args) {
-        return LazyEvaluate([=]{functor(std::move(args)...);});
+#if __cplusplus >= 201402L
+        return LazyEvaluate([=, f = std::forward<Func>(functor)]{f(args...);});
+#else
+        return LazyEvaluate([=]{functor(args...);});
+#endif
     }
     void evaluate() const { _functor(); }
     void operator()() const { _functor(); }
