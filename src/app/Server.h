@@ -19,15 +19,10 @@
         policy = cpp11::make_unique<PolicyImpl<LazyEvaluate>>( \
             LazyEvaluate::lazy(std::forward<Args>(args)...)); \
     } \
-    void callback(std::function<void(ContextType*)> functor) { \
-        using TLDR = std::function<void(ContextType*)>; \
-        policy = cpp11::make_unique<PolicyImpl<TLDR>>(std::move(functor)); \
-    } \
-    void callback(std::function<void(std::weak_ptr<ContextType>)> functor) { \
-        using TLDR = std::function<void(std::weak_ptr<ContextType>)>; \
-        policy = cpp11::make_unique<PolicyImpl<TLDR>>(std::move(functor)); \
-    }
-
+    template <typename Lambda> \
+    void callback(Lambda &&functor) { \
+        policy = cpp11::make_unique<PolicyImpl<Lambda>>(std::forward<Lambda>(functor)); \
+    } 
 
 class Server {
 public:

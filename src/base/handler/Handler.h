@@ -13,14 +13,16 @@
         callbackMember = LazyEvaluate::lazy(std::forward<Args>(args)...); \
     } \
     /* simple context */ \
-    void functionName(std::function<void(ContextType*)> ctxFunctor) { \
+    template <typename Lambda, typename = IsCallableType<Lambda, ContextType*>> \
+    void functionName(Lambda &&callback) { \
         callbackMember = LazyEvaluate::lazy( \
-            std::move(ctxFunctor), contextMember.get()); \
+            std::forward<Lambda>(callback), contextMember.get()); \
     } \
     /* safe for lifecycle */ \
-    void functionName(std::function<void(std::weak_ptr<ContextType>)> ctxFunctor) { \
+    template <typename Lambda, typename U = IsCallableType<Lambda, std::weak_ptr<ContextType>>> \
+    void functionName(Lambda &&callback, U* = nullptr) { \
         callbackMember = LazyEvaluate::lazy( \
-            std::move(ctxFunctor), contextMember); \
+            std::forward<Lambda>(callback), contextMember); \
     }
 
 class Handler {

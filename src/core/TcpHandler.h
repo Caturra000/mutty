@@ -91,7 +91,7 @@ public:
             this, looper, std::move(acceptedSocket), localAddress, peerAddress)) { }
 
 protected:
-    std::shared_ptr<TcpContext> _ctx; // TODO 改为shared_ptr，且enable shared from this
+    std::shared_ptr<TcpContext> _ctx;
 
     LazyEvaluate _connectionCallback;
     LazyEvaluate _messageCallback;
