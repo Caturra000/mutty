@@ -2,7 +2,7 @@
 #define __BUFFER_POOL_H__
 #include <bits/stdc++.h>
 #include "Buffer.h"
-#include "utils/LazyEvaluate.h"
+#include "utils/Callable.h"
 #include "utils/Algorithms.h"
 
 // using CachedBuffer = std::shared_ptr<Buffer>; // 不需要引用计数

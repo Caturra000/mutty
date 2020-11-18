@@ -36,7 +36,7 @@ public:
             auto &e = _container.top();
             if(e._when > current) break;
             Defer _ {[this] { _container.pop(); }};
-            if(e._atMost > 0) e._what.evaluate();
+            if(e._atMost > 0) e._what.call();
             if(e._atMost > 1) {
                 reenterables.push_back(e);
                 auto &b = reenterables.back();
@@ -61,7 +61,7 @@ public:
         template <typename ...Args>
         TimerHelper& with(Args &&...args) { 
             _thisTimer->append(_when, 
-                LazyEvaluate::lazy(std::forward<Args>(args)...), 
+                Callable::make(std::forward<Args>(args)...), 
                 _interval, _atMost); 
             return *this;
         }

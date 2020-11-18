@@ -8,7 +8,7 @@
 #include "base/timer/Timer.h"
 #include "base/handler/Message.h"
 #include "base/handler/MessageQueue.h"
-#include "utils/LazyEvaluate.h"
+#include "utils/Callable.h"
 #include "utils/Pointer.h"
 #include "base/context/ContextImpl.h"
 
@@ -36,10 +36,10 @@ public:
     Pointer<Timer> timer; // 如果需要用到定时器，只需添加这个即可
 
 
-    // 适配器，绑定当前ctx，让一个functor(ctx)适配为LazyEvaluate
+    // 适配器，绑定当前ctx，让一个functor(ctx)适配为Callable
     // 从Pointer换回raw ptr
-    LazyEvaluate binder(std::function<void(TcpContext*)> functor) {
-        return LazyEvaluate::lazy(std::move(functor), this);
+    Callable binder(std::function<void(TcpContext*)> functor) {
+        return Callable::make(std::move(functor), this);
     }
     
 

@@ -1,7 +1,7 @@
 #ifndef __UTILS_THREAD_POOL_H__
 #define __UTILS_THREAD_POOL_H__
 #include <bits/stdc++.h>
-// #include "utils/LazyEvaluate.h" // 独立使用
+// #include "utils/Callable.h" // 独立使用
 // FIXED
 class ThreadPool {
 public:
@@ -23,7 +23,7 @@ public:
     void execute(Func &&functor, Args &&...args) {
         {
             std::lock_guard<std::mutex> _ { _data->_mutex};
-            // _data->_tasks.emplace(LazyEvaluate::lazy(
+            // _data->_tasks.emplace(Callable::make(
             //     std::forward<Func>(functor), std::forward<Args>(args)...));
             _data->_tasks.emplace([=] {functor(std::move(args)...);});
         }

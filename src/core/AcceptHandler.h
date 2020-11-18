@@ -31,7 +31,7 @@ public:
         Socket connectSocket = _ctx->acceptSocket.accept(peerAddress);
         _ctx->exchanger = std::pair<Socket, InetAddress>(
             std::move(connectSocket), std::move(peerAddress));
-        _newConnectionCallback.evaluate(); // add to ConnectionPool of Server
+        _newConnectionCallback(); // add to ConnectionPool of Server
     }
 
 // callback定义
@@ -52,6 +52,6 @@ public:
 protected:
     std::shared_ptr<AcceptContext> _ctx;
 
-    LazyEvaluate _newConnectionCallback;
+    Callable _newConnectionCallback;
 };
 #endif

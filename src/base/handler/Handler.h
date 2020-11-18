@@ -2,7 +2,7 @@
 #define __HANDLER_H__
 #include <bits/stdc++.h>
 
-#include "utils/LazyEvaluate.h"
+#include "utils/Callable.h"
 #include "utils/TypeTraits.h"
 #include "Message.h"
 
@@ -10,18 +10,18 @@
     /* non-context */ \
     template <typename ...Args, typename = IsCallableType<Args...>> \
     void functionName(Args &&...args) { \
-        callbackMember = LazyEvaluate::lazy(std::forward<Args>(args)...); \
+        callbackMember = Callable::make(std::forward<Args>(args)...); \
     } \
     /* simple context */ \
     template <typename Lambda, typename = IsCallableType<Lambda, ContextType*>> \
     void functionName(Lambda &&callback) { \
-        callbackMember = LazyEvaluate::lazy( \
+        callbackMember = Callable::make( \
             std::forward<Lambda>(callback), contextMember.get()); \
     } \
     /* safe for lifecycle */ \
     template <typename Lambda, typename U = IsCallableType<Lambda, std::weak_ptr<ContextType>>> \
     void functionName(Lambda &&callback, U* = nullptr) { \
-        callbackMember = LazyEvaluate::lazy( \
+        callbackMember = Callable::make( \
             std::forward<Lambda>(callback), contextMember); \
     }
 

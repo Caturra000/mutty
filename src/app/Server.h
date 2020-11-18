@@ -16,8 +16,8 @@
 #define POLICY_CALLBACK_DEFINE(callback, policy, ContextType) \
     template <typename ...Args, typename = IsCallableType<Args...>> \
     void callback(Args &&...args) { \
-        policy = cpp11::make_unique<PolicyImpl<LazyEvaluate>>( \
-            LazyEvaluate::lazy(std::forward<Args>(args)...)); \
+        policy = cpp11::make_unique<PolicyImpl<Callable>>( \
+            Callable::make(std::forward<Args>(args)...)); \
     } \
     template <typename Lambda> \
     void callback(Lambda &&functor) { \

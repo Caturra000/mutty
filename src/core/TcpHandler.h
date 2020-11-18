@@ -54,7 +54,7 @@ public:
     void handleRead() {
         int n = _ctx->inputBuffer.readFrom(_ctx->acceptedSocket.fd());
         if(n > 0) {
-            _messageCallback.evaluate();
+            _messageCallback();
         } else if(n == 0) { // FIN
             handleClose();
         } else {
@@ -67,7 +67,7 @@ public:
         if(n > 0) {
             if(_ctx->outputBuffer.rest() == 0) {
                 _ctx->disableWrite();
-                _writeCompleteCallback.evaluate(); // shutdown
+                _writeCompleteCallback(); // shutdown
             }
             // TODO shutdown option
         }
@@ -80,8 +80,8 @@ public:
     void handleClose() {
         _ctx->disableRead();
         _ctx->disableWrite();
-        // _connectionCallback.evaluate(); // UNUSED
-        _closeCallback.evaluate();
+        // _connectionCallback.call(); // UNUSED
+        _closeCallback();
     }
 
 
@@ -93,10 +93,10 @@ public:
 protected:
     std::shared_ptr<TcpContext> _ctx;
 
-    LazyEvaluate _connectionCallback;
-    LazyEvaluate _messageCallback;
-    LazyEvaluate _writeCompleteCallback;
-    LazyEvaluate _closeCallback;
+    Callable _connectionCallback;
+    Callable _messageCallback;
+    Callable _writeCompleteCallback;
+    Callable _closeCallback;
 };
 
 #endif
