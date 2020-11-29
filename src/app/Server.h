@@ -11,18 +11,7 @@
 #include "core/AcceptHandler.h"
 #include "core/ConnectionPool.h"
 #include "core/TcpHandler.h"
-
-
-#define POLICY_CALLBACK_DEFINE(callback, policy, ContextType) \
-    template <typename ...Args, typename = IsCallableType<Args...>> \
-    void callback(Args &&...args) { \
-        policy = cpp11::make_unique<PolicyImpl<Callable>>( \
-            Callable::make(std::forward<Args>(args)...)); \
-    } \
-    template <typename Lambda> \
-    void callback(Lambda &&functor) { \
-        policy = cpp11::make_unique<PolicyImpl<Lambda>>(std::forward<Lambda>(functor)); \
-    } 
+#include "core/TcpPolicy.h"
 
 class Server {
 public:
@@ -54,45 +43,21 @@ private:
 
 // for TcpHandler
 
-    // 用于泛型擦除
-    struct Policy {
-        //virtual void setHandler(TcpHandler*) = 0;
-        virtual void onConnect(TcpHandler*) = 0;
-        virtual void onMessage(TcpHandler*) = 0;
-        virtual void onWriteComplete(TcpHandler*) = 0;
-        virtual void onClose(TcpHandler*) = 0;
-        virtual ~Policy() { }
-    };
-
     // 使用unique_ptr提供RAII和多态
 
-    std::unique_ptr<Policy> _connectPolicy;
-    std::unique_ptr<Policy> _messagePolicy;
-    std::unique_ptr<Policy> _writeCompletePolicy;
-    std::unique_ptr<Policy> _closePolicy;
+    std::unique_ptr<TcpPolicy> _connectPolicy;
+    std::unique_ptr<TcpPolicy> _messagePolicy;
+    std::unique_ptr<TcpPolicy> _writeCompletePolicy;
+    std::unique_ptr<TcpPolicy> _closePolicy;
 
-    template <typename T>
-    struct PolicyImpl: public Policy {
-        //using DecayT = typename std::decay<T>::type;
-        T runtimeInfo;
-        PolicyImpl(T info): runtimeInfo(std::move(info)) {}
-        void onConnect(TcpHandler *connection) override
-            { connection->onConnect(runtimeInfo);} // copy
-        void onMessage(TcpHandler *connection) override
-            { connection->onMessage(runtimeInfo);}
-        void onWriteComplete(TcpHandler *connection) override
-            { connection->onWriteComplete(runtimeInfo);}
-        void onClose(TcpHandler *connection) override
-            { connection->onClose(runtimeInfo);} 
-    } ;
 public:
 
 // server回调注册接口
 
-    POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy, TcpContext)
-    POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy, TcpContext)
-    POLICY_CALLBACK_DEFINE(onWriteComplete, _writeCompletePolicy, TcpContext)
-    POLICY_CALLBACK_DEFINE(onClose, _closePolicy, TcpContext)
+    TCP_POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy, TcpContext)
+    TCP_POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy, TcpContext)
+    TCP_POLICY_CALLBACK_DEFINE(onWriteComplete, _writeCompletePolicy, TcpContext)
+    TCP_POLICY_CALLBACK_DEFINE(onClose, _closePolicy, TcpContext)
 
 private:
     Pointer<Looper> _looper;

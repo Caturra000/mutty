@@ -8,6 +8,7 @@
 #include "core/Looper.h"
 #include "core/ConnectionPool.h"
 #include "core/TcpHandler.h"
+#include "core/TcpPolicy.h"
 #include "net/InetAddress.h"
 #include "net/Socket.h"
 
@@ -17,8 +18,6 @@ public:
         : _looper(looper), _serverAddress(serverAddress) {}
 
     void connect();
-    void connecting(Socket socket/*, InetAddress address*/);
-    void retry();
     // void disconnect();
     // void stop();
 
@@ -26,8 +25,15 @@ public:
     void disableRetry() { _retry = false; }
     bool isRetryEnabled() { return _retry; }
 
+    TCP_POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy, TcpContext)
+    TCP_POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy, TcpContext)
+    TCP_POLICY_CALLBACK_DEFINE(onWriteComplete, _writeCompletePolicy, TcpContext)
+    TCP_POLICY_CALLBACK_DEFINE(onClose, _closePolicy, TcpContext)
+
 private:
-    void tcpCallbackInit(TcpHandler *connection); // TODO
+    void connecting(Socket socket/*, InetAddress address*/);
+    void retry();
+    void tcpCallbackInit(TcpHandler *connection);
 
 private:
     Pointer<Looper> _looper;
@@ -39,6 +45,13 @@ private:
     // SingleConnectionPool _reusableConnection;
     // 目前考虑的问题是Handler是否要求无状态 
     // ctx并不需维护什么状态，只需有TcpHandler/TcpContext就好了
+
+// for TcpHandler
+
+    std::unique_ptr<TcpPolicy> _connectPolicy;
+    std::unique_ptr<TcpPolicy> _messagePolicy;
+    std::unique_ptr<TcpPolicy> _writeCompletePolicy;
+    std::unique_ptr<TcpPolicy> _closePolicy;
 
 };
 
@@ -69,7 +82,7 @@ void Client::connect() {
 inline void Client::connecting(Socket socket) {
     _connection = cpp11::make_unique<TcpHandler>(
         _looper.get(), std::move(socket), InetAddress{/*NONE*/}, _serverAddress);
-    // TODO callback
+    tcpCallbackInit(_connection.get());
 }
 
 inline void Client::retry() {
@@ -79,5 +92,12 @@ inline void Client::retry() {
     constexpr static Millisecond MAX_RETRY = 10s;
     Millisecond nextRetry = _retryInterval*2; 
     _retryInterval = std::min(MAX_RETRY, nextRetry);
+}
+
+inline void Client::tcpCallbackInit(TcpHandler *connection) {
+    if(_connectPolicy) _connectPolicy->onConnect(connection);
+    if(_messagePolicy) _messagePolicy->onMessage(connection);
+    if(_writeCompletePolicy) _writeCompletePolicy->onWriteComplete(connection);
+    if(_closePolicy) _closePolicy->onClose(connection);
 }
 #endif
