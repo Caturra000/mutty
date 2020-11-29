@@ -5,7 +5,9 @@
 #include "TcpHandler.h"
 #include "LooperPool.h"
 // 用于为Server提供Connection容器
-class ConnectionPool {
+
+template <size_t N> // N为Looper池大小
+class ConnectionPoolBase {
 public:
 
     // 返回值只建议在调用该方法的最小作用域内使用
@@ -25,7 +27,7 @@ public:
         }
     }
 
-    ConnectionPool(int size = 16): _container(size), _reusableIndex(0), _window{0,-1} { }
+    ConnectionPoolBase(int size = 16): _container(size), _reusableIndex(0), _window{0,-1} { }
 
 private:
 
@@ -79,6 +81,11 @@ private:
     struct { int left, right; } _window; // 用于维护回收连接的窗口
     constexpr static int step = 2;
 
-    LooperPool<1<<4> _looperPool;
+    LooperPool<N> _looperPool;
 };
+
+
+
+using ConnectionPool = ConnectionPoolBase<1<<4>;
+using SingleConnectionPool = ConnectionPoolBase<1>;
 #endif

@@ -97,7 +97,8 @@ public:
 private:
     Pointer<Looper> _looper;
     AcceptHandler _acceptor;
-    ConnectionPool _connections;
+    ConnectionPool _connections; 
+    // LooperPool与IoLooper同一生命周期，保证了Handler与context在回调时的生命周期
 };
 
 inline void Server::tcpCallbackInit(TcpHandler *connection) {
