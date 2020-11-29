@@ -66,6 +66,7 @@ public:
     void bindAndListen(const InetAddress &serverAddress, int backlog) { bind(serverAddress); listen(backlog); }
     Socket accept(InetAddress &clientAddress);
     Socket accept();
+    int connect(const InetAddress &address);
     void detach() { _socketFd = -1; }
 
 // setter
@@ -91,6 +92,10 @@ inline Socket Socket::accept() {
     int connectFd = ::accept4(_socketFd, nullptr, nullptr,
                         SOCK_NONBLOCK | SOCK_CLOEXEC);
     return Socket(connectFd);
+}
+
+inline int Socket::connect(const InetAddress &address) {
+    return ::connect(_socketFd, (const sockaddr *)(&address), sizeof(address));
 }
 
 inline void Socket::config(Option option) {
