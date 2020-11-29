@@ -8,5 +8,7 @@ public:
 
     ConnectContext(Handler *handler, Looper *looper)
         : ContextImpl(handler, looper) {}
+
+    
 };
 #endif
