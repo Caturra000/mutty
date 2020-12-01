@@ -86,8 +86,8 @@ inline void Client::connecting(Socket socket) {
 }
 
 inline void Client::retry() {
-    auto timer = _looper->getTimer();
-    timer->runAfter(_retryInterval).with([this] { connect(); });
+    auto scheduler = _looper->getScheduler();
+    scheduler->runAfter(_retryInterval).with([this] { connect(); });
     // update 
     constexpr static Millisecond MAX_RETRY = 10s;
     Millisecond nextRetry = _retryInterval*2; 

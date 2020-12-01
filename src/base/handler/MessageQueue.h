@@ -24,6 +24,10 @@ public:
 
     // used only for @Looper
     std::mutex& queueLock() { return _mutex; }
+    bool hasNextUnlock() {
+        std::lock_guard<std::mutex> _{_mutex};
+        return !_queue.empty();
+    }
 
 private:
     std::queue<Message> _queue;
