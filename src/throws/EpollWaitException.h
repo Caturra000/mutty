@@ -5,6 +5,6 @@ class EpollWaitException: public EpollException {
 public:
     static constexpr const char *TAG = "epoll create exception";
     using EpollException::EpollException;
-    EpollWaitException(int err): EpollWaitException(TAG, err) { }
+    EpollWaitException(int err): EpollException(TAG, err) { }
 };
 #endif

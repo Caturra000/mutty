@@ -15,5 +15,6 @@
         #include "EpollException.h"
             #include "EpollCreateException.h"
             #include "EpollWaitException.h"
+            #include "EpollControlException.h"
 
 #endif

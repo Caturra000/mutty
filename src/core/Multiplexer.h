@@ -32,7 +32,9 @@ public:
 
     void update(int operation, Context *ctx) {
         epoll_event event {ctx->events(), ctx};
-        epoll_ctl(_epollFd, operation, ctx->fd(), &event);
+        if(epoll_ctl(_epollFd, operation, ctx->fd(), &event)) {
+            throw EpollControlException(errno);
+        }
             // TODO
         // }
     }
