@@ -7,7 +7,7 @@
 #include "TcpContext.h"
 #include "utils/Pointer.h"
 #include "utils/Pointer.h"
-
+#include "throws/Exceptions.h"
 
 
 class TcpHandler: public Handler {
@@ -46,7 +46,6 @@ public:
     HANDLER_CALLBACK_DEFINE(onMessage,       _messageCallback,       TcpContext, _ctx)
     HANDLER_CALLBACK_DEFINE(onWriteComplete, _writeCompleteCallback, TcpContext, _ctx)
     HANDLER_CALLBACK_DEFINE(onClose,         _closeCallback,         TcpContext, _ctx)
-    using ContextFunctor = std::function<void(TcpContext*)>;
 
 
 // 用于外部定义的函数
@@ -63,24 +62,22 @@ public:
     }
 
     void handleWrite() {
-        int n = _ctx->outputBuffer.writeTo(_ctx->acceptedSocket.fd());
+        int n = _ctx->outputBuffer.writeTo(_ctx->acceptedSocket.fd()); // can async?
         if(n > 0) {
             if(_ctx->outputBuffer.rest() == 0) {
                 _ctx->disableWrite();
-                _writeCompleteCallback(); // shutdown
+                _writeCompleteCallback();
             }
-            // TODO shutdown option
         }
     }
     
     void handleError() {
-        throw std::exception();
+        throw MuttyException("error callback");
     }
 
     void handleClose() {
         _ctx->disableRead();
         _ctx->disableWrite();
-        // _connectionCallback.call(); // UNUSED
         _closeCallback();
     }
 

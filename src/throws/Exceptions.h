@@ -9,5 +9,8 @@
                 #include "SocketBindException.h"
                 #include "SocketListenException.h"
                 #include "SocketAcceptException.h"
+        #include "IoException.h"
+            #include "ReadException.h"
+            #include "WriteException.h"
 
 #endif
