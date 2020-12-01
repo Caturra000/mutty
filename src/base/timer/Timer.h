@@ -27,7 +27,7 @@ public:
     }
 
     // 不会阻塞，只会执行到不符合条件的时间就返回
-    Nanosecond run() {
+    Nanosecond run(std::vector<const Callable*> &callables) {
         std::lock_guard<std::mutex> _ {_mutex};
         if(_container.empty()) return Nanosecond::zero();
         std::vector<TimerEvent> reenterables;
@@ -36,7 +36,7 @@ public:
             auto &e = _container.top();
             if(e._when > current) break;
             Defer _ {[this] { _container.pop(); }};
-            if(e._atMost > 0) e._what.call();
+            if(e._atMost > 0) callables.emplace_back(&e._what); // 尽量缩小锁粒度 // TODO unsafe
             if(e._atMost > 1) {
                 reenterables.push_back(e);
                 auto &b = reenterables.back();
@@ -52,6 +52,13 @@ public:
     }
 
 // Builder Start
+
+    enum URGENCY {
+        MINOR = std::numeric_limits<uint64_t>::max(),
+        MAJOR = MINOR >> 30,
+        CRITICAL = MAJOR >> 30,
+    };
+
     struct TimerHelper {
         Timestamp _when;
         Nanosecond _interval;
@@ -76,6 +83,11 @@ public:
         }
         TimerHelper at(Timestamp when) {
             _when = when;
+            return *this;
+        }
+
+        TimerHelper priority(URGENCY urgency) {
+            _atMost = urgency;
             return *this;
         }
     };
