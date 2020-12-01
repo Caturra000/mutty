@@ -14,17 +14,13 @@ class Looper {
 public:
     void loop() {
         if(_threadId != std::this_thread::get_id()) return;
-        std::vector<const Callable*> callables;
         for(MessageQueue provider; !_stop || onStop(); ) {
-            auto timeout = _scheduler.run(callables);
+            auto timeout = _scheduler.run();
             _poller.poll(std::max(std::chrono::duration_cast<Millisecond>(timeout), 1ms)); // TODO Config
             // IMRPOVEMENT: 是否可根据一些条件来得知provider没有数据，节省不必要的上锁？
             {
                 std::lock_guard<std::mutex> _ {_provider.lock()};
                 provider = std::move(_provider); // move并不移动原有的锁
-            }
-            for(auto &&it : callables) {
-                it->call();
             }
             while(provider.hasNext()) {
                 consume(provider.next());

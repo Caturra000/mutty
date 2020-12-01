@@ -27,7 +27,7 @@ public:
     }
 
     // 不会阻塞，只会执行到不符合条件的时间就返回
-    Nanosecond run(std::vector<const Callable*> &callables) {
+    Nanosecond run() {
         std::lock_guard<std::mutex> _ {_mutex};
         if(_container.empty()) return Nanosecond::zero();
         std::vector<TimerEvent> reenterables;
@@ -36,9 +36,9 @@ public:
             auto &e = _container.top();
             if(e._when > current) break;
             Defer _ {[this] { _container.pop(); }};
-            if(e._atMost > 0) callables.emplace_back(&e._what); // 尽量缩小锁粒度 // TODO unsafe
+            if(e._atMost > 0) e._what.call();
             if(e._atMost > 1) {
-                reenterables.push_back(e);
+                reenterables.push_back(std::move(const_cast<TimerEvent&>(e)));
                 auto &b = reenterables.back();
                 b._atMost--;
                 b._when += b._interval;
