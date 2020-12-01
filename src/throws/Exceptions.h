@@ -12,5 +12,8 @@
         #include "IoException.h"
             #include "ReadException.h"
             #include "WriteException.h"
+        #include "EpollException.h"
+            #include "EpollCreateException.h"
+            #include "EpollWaitException.h"
 
 #endif

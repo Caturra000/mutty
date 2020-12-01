@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include "utils/Timestamp.h"
 #include "base/context/Context.h"
-// selector poller之类的封装吧
+#include "throws/Exceptions.h"
 
 // 负责epoll的封装
 class Multiplexer {
@@ -16,14 +16,14 @@ private:
 
 public:
     Multiplexer(): _epollFd(epoll_create1(EPOLL_CLOEXEC)), _events(16) {
-        if(_epollFd < 0) throw std::exception();
+        if(_epollFd < 0) throw EpollCreateException(errno);
     }
     ~Multiplexer() { close(_epollFd); }
 
     void poll(Nanosecond timeout) { //支持ns的表示，虽然实现上用不着，因为epoll粒度是ms
         int count = epoll_wait(_epollFd, _events.data(), _events.size(), 
                         std::chrono::duration_cast<Millisecond>(timeout).count());
-        // if(count < 0) throw
+        if(count < 0) throw EpollWaitException(errno);
         dispatchActiveContext(count);
         if(_events.size() == count) {
             _events.reserve(_events.size() << 1);
