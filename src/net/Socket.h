@@ -9,30 +9,29 @@
 #include "utils/Noncopyable.h"
 #include "InetAddress.h"
 #include "netinet/tcp.h"
-
+#include "throws/Exceptions.h"
 
 
 // 针对socket fd的浅层封装，要求只有fd一个成员
 class Socket: public Noncopyable {
 public:
-    
-    
-    
-    Socket(): _socketFd(socket(AF_INET, SOCK_STREAM, 0)) { if(_socketFd < 0) throw std::exception(); }
-    ~Socket() { if(_socketFd >= 0) close(_socketFd); } // 被移动的socketfd < 0
-    explicit Socket(int socketFd): _socketFd(socketFd) { assert(_socketFd >= 0); } // unsafe
-    Socket(Socket &&rhs): _socketFd(rhs._socketFd) { rhs._socketFd = -1; }
+    static constexpr int INVALID_FD = -1;
+    Socket(): _socketFd(socket(AF_INET, SOCK_STREAM, 0)) 
+        { if(_socketFd < 0) throw SocketCreateException(errno); }
+    ~Socket() { if(_socketFd != INVALID_FD) ::close(_socketFd); }
+    explicit Socket(int socketFd): _socketFd(socketFd) { assert(_socketFd != INVALID_FD); } // unsafe
+    Socket(Socket &&rhs): _socketFd(rhs._socketFd) { rhs._socketFd = INVALID_FD; }
     Socket& operator=(Socket &&rhs) {
         if(this == &rhs) return *this;
         _socketFd = rhs._socketFd;
-        rhs._socketFd = -1;
+        rhs._socketFd = INVALID_FD;
         return *this;
     }
 
     // int fd = std::move(socket);
     operator int() && {
         int fd = _socketFd;
-        _socketFd = -1;
+        _socketFd = INVALID_FD;
         return fd;
     }
     
@@ -61,13 +60,14 @@ public:
 
 // wrapper
 
-    void bind(const InetAddress &address) { if(::bind(_socketFd, (const sockaddr*)(&address), sizeof(InetAddress))) throw std::exception(); }
-    void listen(int backlog = 128) { if(::listen(_socketFd, backlog)) throw std::exception(); }
-    void bindAndListen(const InetAddress &serverAddress, int backlog) { bind(serverAddress); listen(backlog); }
+    void bind(const InetAddress &address);
+    void listen(int backlog = 128);
+    void bindAndListen(const InetAddress &serverAddress, int backlog) 
+        { bind(serverAddress); listen(backlog); }
     Socket accept(InetAddress &clientAddress);
     Socket accept();
     int connect(const InetAddress &address);
-    void detach() { _socketFd = -1; }
+    void detach() { _socketFd = INVALID_FD; }
 
 // setter
 
@@ -82,9 +82,22 @@ private:
     int _socketFd;
 };
 
+inline void Socket::bind(const InetAddress &address) { 
+    if(::bind(_socketFd, (const sockaddr*)(&address), sizeof(InetAddress))) {
+        throw SocketBindException(errno);
+    } 
+}
+inline void Socket::listen(int backlog) { 
+    if(::listen(_socketFd, backlog)) {
+        throw SocketListenException(errno); 
+    }
+}
+
+
 inline Socket Socket::accept(InetAddress &address) {
     int connectFd = ::accept4(_socketFd, (sockaddr*)(&address), nullptr,
                         SOCK_NONBLOCK | SOCK_CLOEXEC);
+    if(connectFd < 0) throw SocketAcceptException(errno);
     return Socket(connectFd);
 }
 
@@ -95,6 +108,7 @@ inline Socket Socket::accept() {
 }
 
 inline int Socket::connect(const InetAddress &address) {
+    // 不抛出异常
     return ::connect(_socketFd, (const sockaddr *)(&address), sizeof(address));
 }
 
