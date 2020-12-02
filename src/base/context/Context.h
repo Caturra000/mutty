@@ -36,8 +36,8 @@ public:
     virtual void enableWrite() {}
     virtual void disableRead() {}
     virtual void disableWrite() {}
-    virtual bool readEnabled() {}
-    virtual bool writeEnabled() {}
+    virtual bool readEnabled() { return false; }
+    virtual bool writeEnabled() { return false;}
     // add remove change
 };
 
