@@ -17,16 +17,10 @@ class TcpHandler;
 class TcpContext: public ContextImpl/*, public std::enable_shared_from_this<TcpContext>*/ {
 public:
     
+// 状态机
+
     enum NetworkStatus { CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED };
     NetworkStatus networkStatus { CONNECTING };
-    
-// MESSAGE定制
-
-    // CONTEXT_MSG_DEFINE(MSG_POLL_READ);
-    // CONTEXT_MSG_DEFINE(MSG_POLL_WRITE);
-    // CONTEXT_MSG_DEFINE(MSG_POLL_ERROR);
-    // CONTEXT_MSG_DEFINE(MSG_POLL_CLOSE);
-    
 
 // 网络特性支持
 
@@ -36,7 +30,7 @@ public:
 
 // 定时器特性支持
 
-    Pointer<Timer> timer; // 如果需要用到定时器，只需添加这个即可
+    Pointer<Timer> scheduler; // 如果需要用到定时器，只需添加这个即可
 
 
     // 适配器，绑定当前ctx，让一个functor(ctx)适配为Callable
@@ -58,11 +52,19 @@ public:
 
 // in handle
 
-    void shutdown() {
-        if(_events & EVENT_WRITE) {
-            acceptedSocket.shutdown();
+    // force: 无视TCP状态
+    void shutdown(bool force = false) {
+        if(force || isConnected()) {
+            setDisConnecting();
+            if(_events & EVENT_WRITE) {
+                acceptedSocket.shutdown();
+            }
         }
+        // 直到close才会DisConnected
     }
+
+
+    // 主动handleClose
     void forceClose() {
         if(isConnected() || isDisConnecting()) {
             sendCloseMessage();
@@ -70,7 +72,33 @@ public:
     }
 
     void forceClose(Nanosecond delay) {
-        timer->runAfter(delay).with([/*shared_from*/this] { forceClose(); });
+        scheduler->runAfter(delay).with([/*shared_from*/this] { forceClose(); });
+    }
+
+    void send(const std::string &str) {
+        send(str.c_str(), str.length());
+    }
+
+    // buffer存在时会由write event
+    // TODO Direct模式
+    void send(const void *data, int length) {
+        if(!isDisConnected()) {
+            // int wrote = 0;
+            // if(!(_events & EVENT_WRITE) && outputBuffer.rest() == 0) {
+            //     wrote = ::write(acceptedSocket.fd(), data, length);
+            //     if(wrote > 0) {
+            //         if(wrote == length) {
+            //             // send complete
+            //         }
+            //     } // else may throw
+            // }
+            // if(wrote < length) {
+            //     outputBuffer.append(static_cast<const char *>(data) + wrote, length - wrote);
+            //     if(!(_events & EVENT_WRITE)) enableWrite();
+            // }
+            outputBuffer.append(static_cast<const char *>(data), length);
+            if(!(_events & EVENT_WRITE)) enableWrite();
+        }
     }
 
 // ONLY FOR POLLER
@@ -83,7 +111,8 @@ public:
         : ContextImpl(handler, looper),
           acceptedSocket(std::move(acceptedSocket)),
           localAddress(localAddress),
-          peerAddress(peerAddress) {}
+          peerAddress(peerAddress),
+          scheduler(looper ? looper->getScheduler() : nullptr) {}
 
 };
 #endif

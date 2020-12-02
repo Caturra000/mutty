@@ -56,6 +56,8 @@ public:
     void enableWrite()  override { _events |= EVENT_WRITE; updateState(); }
     void disableRead()  override { _events &= ~EVENT_READ; updateState(); }
     void disableWrite() override { _events &= ~EVENT_WRITE; updateState(); }
+    bool readEnabled()  override { return _events & EVENT_READ; }
+    bool writeEnabled() override { return _events & EVENT_WRITE; }
     // error / close
 
     ContextImpl(Handler *handler = nullptr, Looper *looper = nullptr)

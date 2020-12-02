@@ -56,17 +56,22 @@ public:
             _messageCallback();
         } else if(n == 0) { // FIN
             handleClose();
-        } else {
+        } else { // 走到这前应该已被异常抛出
             handleError();
         }
     }
 
     void handleWrite() {
-        int n = _ctx->outputBuffer.writeTo(_ctx->acceptedSocket.fd()); // can async?
-        if(n > 0) {
-            if(_ctx->outputBuffer.rest() == 0) {
-                _ctx->disableWrite();
-                _writeCompleteCallback();
+        if(_ctx->writeEnabled()) {
+            int n = _ctx->outputBuffer.writeTo(_ctx->acceptedSocket.fd()); // can async?
+            if(n > 0) {
+                if(_ctx->outputBuffer.rest() == 0) {
+                    _ctx->disableWrite();
+                    _writeCompleteCallback();
+                }
+                if(_ctx->isDisConnecting()) {
+                    _ctx->shutdown(true);
+                }
             }
         }
     }
@@ -76,13 +81,12 @@ public:
     }
 
     void handleClose() {
-        if(_ctx->isConnecting() || _ctx->isDisConnecting()) {
+        if(_ctx->isConnected() || _ctx->isDisConnecting()) {
             _ctx->disableRead();
             _ctx->disableWrite();
-            _ctx->networkStatus = TcpContext::DISCONNECTED;
+            _ctx->setDisConnected();
             _closeCallback();
         }
-        
     }
 
 
