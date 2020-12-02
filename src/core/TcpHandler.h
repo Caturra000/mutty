@@ -69,9 +69,6 @@ public:
                     _ctx->disableWrite();
                     _writeCompleteCallback();
                 }
-                if(_ctx->isDisConnecting()) {
-                    _ctx->shutdown(true);
-                }
             }
         }
     }

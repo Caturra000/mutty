@@ -52,9 +52,9 @@ public:
 
 // in handle
 
-    // force: 无视TCP状态
-    void shutdown(bool force = false) {
-        if(force || isConnected()) {
+    // 主动优雅关闭
+    void shutdown(/*bool force = false*/) {
+        if(/*force || */isConnected()) {
             setDisConnecting();
             if(_events & EVENT_WRITE) {
                 acceptedSocket.shutdown();
