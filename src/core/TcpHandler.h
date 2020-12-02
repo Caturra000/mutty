@@ -76,9 +76,13 @@ public:
     }
 
     void handleClose() {
-        _ctx->disableRead();
-        _ctx->disableWrite();
-        _closeCallback();
+        if(_ctx->isConnecting() || _ctx->isDisConnecting()) {
+            _ctx->disableRead();
+            _ctx->disableWrite();
+            _ctx->networkStatus = TcpContext::DISCONNECTED;
+            _closeCallback();
+        }
+        
     }
 
 

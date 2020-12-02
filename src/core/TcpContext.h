@@ -16,7 +16,10 @@
 class TcpHandler;
 class TcpContext: public ContextImpl/*, public std::enable_shared_from_this<TcpContext>*/ {
 public:
-
+    
+    enum NetworkStatus { CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED };
+    NetworkStatus networkStatus { CONNECTING };
+    
 // MESSAGE定制
 
     // CONTEXT_MSG_DEFINE(MSG_POLL_READ);
@@ -41,7 +44,34 @@ public:
     Callable binder(std::function<void(TcpContext*)> functor) {
         return Callable::make(std::move(functor), this);
     }
-    
+
+// wrapper
+
+    bool isConnecting() { return networkStatus == CONNECTING; }
+    bool isConnected() { return networkStatus == CONNECTED; }
+    bool isDisConnecting() { return networkStatus == DISCONNECTING; }
+    bool isDisConnected() { return networkStatus == DISCONNECTED; }
+    void setConnecting() { networkStatus = CONNECTING; }
+    void setConnected() { networkStatus = CONNECTED; }
+    void setDisConnecting() { networkStatus = DISCONNECTING; }
+    void setDisConnected() { networkStatus = DISCONNECTED; }
+
+// in handle
+
+    void shutdown() {
+        if(_events & EVENT_WRITE) {
+            acceptedSocket.shutdown();
+        }
+    }
+    void forceClose() {
+        if(isConnected() || isDisConnecting()) {
+            sendCloseMessage();
+        }
+    }
+
+    void forceClose(Nanosecond delay) {
+        timer->runAfter(delay).with([/*shared_from*/this] { forceClose(); });
+    }
 
 // ONLY FOR POLLER
 

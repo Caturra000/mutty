@@ -68,6 +68,7 @@ public:
     Socket accept();
     int connect(const InetAddress &address);
     void detach() { _socketFd = INVALID_FD; }
+    void shutdown() { ::shutdown(_socketFd, SHUT_WR); }
 
 // setter
 
