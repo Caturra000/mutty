@@ -27,9 +27,9 @@ public:
     }
 
     // 不会阻塞，只会执行到不符合条件的时间就返回
-    Nanosecond run() {
+    Millisecond run() {
         std::lock_guard<std::mutex> _ {_mutex};
-        if(_container.empty()) return Nanosecond::zero();
+        if(_container.empty()) return Millisecond::zero();
         std::vector<TimerEvent> reenterables;
         Timestamp current = now();
         while(!_container.empty()) {
@@ -47,8 +47,8 @@ public:
             }
         }
         for(auto &e : reenterables) _container.push(std::move(e)); // 同event在单次run只运行一次
-        if(!_container.empty()) return _container.top()._when - now(); // 如果是负数？
-        return Nanosecond::zero();
+        if(_container.empty()) return Millisecond::zero();
+        return std::chrono::duration_cast<Millisecond>(_container.top()._when - now());
     }
 
 // Builder Start
