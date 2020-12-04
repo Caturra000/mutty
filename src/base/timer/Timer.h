@@ -51,6 +51,42 @@ public:
         return std::chrono::duration_cast<Millisecond>(_container.top()._when - now());
     }
 
+    // 避免call在timer中调用，减少可能的锁争用
+    Millisecond run(std::vector<TimerEvent> &tasks) {
+        std::lock_guard<std::mutex> _ {_mutex};
+        static std::vector<TimerEvent> reenterables; // static保证capacity会被下一次利用到
+        Timestamp current = now();
+        while(!tasks.empty()) {
+            auto &task = tasks.back();
+            if(task._atMost > 1) {
+                task._when += task._interval;
+                task._atMost--;
+                if(!(task._atMost & 7)) task._ticket += random();
+                if(task._when > current) {
+                    _container.emplace(std::move(task));
+                } else {
+                    reenterables.emplace_back(std::move(task));
+                }
+            }
+            tasks.pop_back();
+        }
+        while(!reenterables.empty()) {
+            auto &task = reenterables.back();
+            tasks.emplace_back(std::move(task));
+            reenterables.pop_back();
+        }
+        if(_container.empty()) return Millisecond::zero();
+        while(!_container.empty()) {
+            auto &task = _container.top();
+            if(task._when > current) break;
+            tasks.emplace_back(std::move(std::move(const_cast<TimerEvent&>(task))));
+            _container.pop();
+        }
+        // TODO 记录tasks中atMost > 1的下一次when的min
+        if(_container.empty()) return Millisecond::zero();
+        return std::chrono::duration_cast<Millisecond>(_container.top()._when - now());
+    }
+
 // Builder Start
 
     enum URGENCY {

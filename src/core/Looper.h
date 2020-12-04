@@ -13,8 +13,12 @@
 class Looper {
 public:
     void loop() {
+        std::vector<TimerEvent> tasks;
         for(MessageQueue provider; !_stop || onStop(); ) {
-            auto timeout = _scheduler.run();
+            auto timeout = _scheduler.run(tasks);
+            for(auto &&task : tasks) {
+                task._what();
+            }
             _poller.poll(std::max(timeout, 1ms)); // TODO Config
             /* synchronized(_provider) */ {
                 std::lock_guard<std::mutex> _ {_provider.lock()};
