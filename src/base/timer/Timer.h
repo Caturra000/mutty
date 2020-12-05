@@ -39,10 +39,7 @@ public:
             if(e._atMost > 1) {
                 _reenterables.push_back(std::move(const_cast<TimerEvent&>(e)));
                 auto &b = _reenterables.back();
-                b._atMost--;
-                b._when += b._interval;
-                // 解决资源饥饿，每8次重新调度
-                if(!(b._atMost & 7)) b._ticket += random();
+                b.next();
             }
         }
         for(auto &e : _reenterables) _container.push(std::move(e)); // 同event在单次run只运行一次
@@ -51,15 +48,14 @@ public:
     }
 
     // 避免call在timer中调用，减少可能的锁争用
+    // TODO 目前没有保证call()在时间上的严格升序，作为scheduler可能不安全（单次运行是可保证的）
     Millisecond run(std::vector<TimerEvent> &tasks) {
         std::lock_guard<std::mutex> _ {_mutex};
         Timestamp current = now();
         for(size_t n = tasks.size(); n; --n) {
             auto &task = tasks.back();
             if(task._atMost > 1) {
-                task._when += task._interval;
-                task._atMost--;
-                if(!(task._atMost & 7)) task._ticket += random();
+                task.next();
                 // TODO 使用std::list维护reenter时的ticket
                 //      当优先级较高时插入头部，否则插入尾部
                 if(task._when > current) {
