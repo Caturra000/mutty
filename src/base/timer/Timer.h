@@ -60,6 +60,8 @@ public:
                 task._when += task._interval;
                 task._atMost--;
                 if(!(task._atMost & 7)) task._ticket += random();
+                // TODO 使用std::list维护reenter时的ticket
+                //      当优先级较高时插入头部，否则插入尾部
                 if(task._when > current) {
                     _container.emplace(std::move(task));
                 } else {
