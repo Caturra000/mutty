@@ -30,7 +30,6 @@ public:
     Millisecond run() {
         std::lock_guard<std::mutex> _ {_mutex};
         if(_container.empty()) return Millisecond::zero();
-        std::vector<TimerEvent> reenterables;
         Timestamp current = now();
         while(!_container.empty()) {
             auto &e = _container.top();
@@ -38,15 +37,15 @@ public:
             Defer _ {[this] { _container.pop(); }};
             if(e._atMost > 0) e._what.call();
             if(e._atMost > 1) {
-                reenterables.push_back(std::move(const_cast<TimerEvent&>(e)));
-                auto &b = reenterables.back();
+                _reenterables.push_back(std::move(const_cast<TimerEvent&>(e)));
+                auto &b = _reenterables.back();
                 b._atMost--;
                 b._when += b._interval;
                 // 解决资源饥饿，每8次重新调度
                 if(!(b._atMost & 7)) b._ticket += random();
             }
         }
-        for(auto &e : reenterables) _container.push(std::move(e)); // 同event在单次run只运行一次
+        for(auto &e : _reenterables) _container.push(std::move(e)); // 同event在单次run只运行一次
         if(_container.empty()) return Millisecond::zero();
         return std::chrono::duration_cast<Millisecond>(_container.top()._when - now());
     }
@@ -54,9 +53,8 @@ public:
     // 避免call在timer中调用，减少可能的锁争用
     Millisecond run(std::vector<TimerEvent> &tasks) {
         std::lock_guard<std::mutex> _ {_mutex};
-        static std::vector<TimerEvent> reenterables; // static保证capacity会被下一次利用到
         Timestamp current = now();
-        while(!tasks.empty()) {
+        for(size_t n = tasks.size(); n; --n) {
             auto &task = tasks.back();
             if(task._atMost > 1) {
                 task._when += task._interval;
@@ -65,16 +63,12 @@ public:
                 if(task._when > current) {
                     _container.emplace(std::move(task));
                 } else {
-                    reenterables.emplace_back(std::move(task));
+                    _reenterables.emplace_back(std::move(task));
                 }
             }
             tasks.pop_back();
         }
-        while(!reenterables.empty()) {
-            auto &task = reenterables.back();
-            tasks.emplace_back(std::move(task));
-            reenterables.pop_back();
-        }
+        _reenterables.swap(tasks); // next time
         if(_container.empty()) return Millisecond::zero();
         while(!_container.empty()) {
             auto &task = _container.top();
@@ -145,6 +139,7 @@ private:
     EventHeap _container;
     bool _running {false};
     std::mutex _mutex;
+    std::vector<TimerEvent> _reenterables;
 };
 
 #endif
