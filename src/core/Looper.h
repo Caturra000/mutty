@@ -13,7 +13,7 @@
 class Looper {
 public:
     void loop() {
-        std::vector<TimerEvent> tasks;
+        Timer::ResultSet tasks;
         for(MessageQueue provider; !_stop || onStop(); ) {
             auto timeout = _scheduler.run(tasks);
             for(auto &&task : tasks) {

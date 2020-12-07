@@ -9,9 +9,10 @@
 
 
 class Timer {
-    using EventHeap = std::priority_queue<
-            TimerEvent, std::vector<TimerEvent>, std::greater<TimerEvent>>;    
 public:
+    using EventHeap = std::priority_queue<
+            TimerEvent, std::vector<TimerEvent>, std::greater<TimerEvent>>;
+    using ResultSet = std::vector<TimerEvent>;
     Timer() = default;
     Timer(std::initializer_list<TimerEvent> eventList): Timer() {
         for(auto &e : eventList) {
@@ -49,7 +50,7 @@ public:
 
     // 避免call在timer中调用，减少可能的锁争用
     // TODO 目前没有保证call()在时间上的严格升序，作为scheduler可能不安全（单次运行是可保证的）
-    Millisecond run(std::vector<TimerEvent> &tasks) {
+    Millisecond run(ResultSet &tasks) {
         std::lock_guard<std::mutex> _ {_mutex};
         Timestamp current = now();
         for(size_t n = tasks.size(); n; --n) {
@@ -137,7 +138,7 @@ private:
     EventHeap _container;
     bool _running {false};
     std::mutex _mutex;
-    std::vector<TimerEvent> _reenterables;
+    ResultSet _reenterables;
 };
 
 #endif
