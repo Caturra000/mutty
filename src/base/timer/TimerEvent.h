@@ -20,6 +20,8 @@ struct TimerEvent {
         return _ticket > rhs._ticket;
     }
 
+    void operator() () const { _what.call(); }
+
     void next() {
         _when += _interval;
         _atMost--;

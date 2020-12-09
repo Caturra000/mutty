@@ -44,6 +44,7 @@ public:
             }
         }
         for(auto &e : _reenterables) _container.push(std::move(e)); // 同event在单次run只运行一次
+        _reenterables.clear();
         if(_container.empty()) return Millisecond::zero();
         return std::chrono::duration_cast<Millisecond>(_container.top()._when - now());
     }
