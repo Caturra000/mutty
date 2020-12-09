@@ -84,7 +84,7 @@ public:
     void send(const void *data, int length) {
         if(!isDisConnected()) {
             // int wrote = 0;
-            // if(!(_events & EVENT_WRITE) && outputBuffer.rest() == 0) {
+            // if(!(_events & EVENT_WRITE) && outputBuffer.unread() == 0) {
             //     wrote = ::write(acceptedSocket.fd(), data, length);
             //     if(wrote > 0) {
             //         if(wrote == length) {

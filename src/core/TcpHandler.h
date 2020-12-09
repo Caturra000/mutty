@@ -65,7 +65,7 @@ public:
         if(_ctx->writeEnabled()) {
             int n = _ctx->outputBuffer.writeTo(_ctx->acceptedSocket.fd()); // can async?
             if(n > 0) {
-                if(_ctx->outputBuffer.rest() == 0) {
+                if(_ctx->outputBuffer.unread() == 0) {
                     _ctx->disableWrite();
                     _writeCompleteCallback();
                 }
