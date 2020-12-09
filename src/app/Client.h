@@ -25,10 +25,10 @@ public:
     void disableRetry() { _retry = false; }
     bool isRetryEnabled() { return _retry; }
 
-    TCP_POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy, TcpContext)
-    TCP_POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy, TcpContext)
-    TCP_POLICY_CALLBACK_DEFINE(onWriteComplete, _writeCompletePolicy, TcpContext)
-    TCP_POLICY_CALLBACK_DEFINE(onClose, _closePolicy, TcpContext)
+    TCP_POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy)
+    TCP_POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy)
+    TCP_POLICY_CALLBACK_DEFINE(onWriteComplete, _writeCompletePolicy)
+    TCP_POLICY_CALLBACK_DEFINE(onClose, _closePolicy)
 
 private:
     void connecting(Socket socket/*, InetAddress address*/);

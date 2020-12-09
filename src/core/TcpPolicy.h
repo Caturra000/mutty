@@ -4,7 +4,7 @@
 #include "core/TcpHandler.h"
 
 
-#define TCP_POLICY_CALLBACK_DEFINE(callback, policy, ContextType) \
+#define TCP_POLICY_CALLBACK_DEFINE(callback, policy) \
     template <typename ...Args, typename = IsCallableType<Args...>> \
     void callback(Args &&...args) { \
         policy = cpp11::make_unique<TcpPolicyImpl<Callable>>( \

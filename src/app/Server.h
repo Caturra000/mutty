@@ -34,6 +34,7 @@ public:
                 tcpCallbackInit(connection.get());
             }
         });
+        _acceptor.listen();
     }
 
 
@@ -54,10 +55,10 @@ public:
 
 // server回调注册接口
 
-    TCP_POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy, TcpContext)
-    TCP_POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy, TcpContext)
-    TCP_POLICY_CALLBACK_DEFINE(onWriteComplete, _writeCompletePolicy, TcpContext)
-    TCP_POLICY_CALLBACK_DEFINE(onClose, _closePolicy, TcpContext)
+    TCP_POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy)
+    TCP_POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy)
+    TCP_POLICY_CALLBACK_DEFINE(onWriteComplete, _writeCompletePolicy)
+    TCP_POLICY_CALLBACK_DEFINE(onClose, _closePolicy)
 
 private:
     Pointer<Looper> _looper;
