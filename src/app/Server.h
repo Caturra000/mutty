@@ -32,6 +32,7 @@ public:
                 auto &connection = _connections.createNewConnection(
                     std::move(connectionSocket), ctx->localAddress, peerAddress);
                 tcpCallbackInit(connection.get());
+                connection->init();
             }
         });
         _acceptor.init();

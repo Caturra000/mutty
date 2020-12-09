@@ -84,6 +84,7 @@ inline void Client::connecting(Socket socket) {
     _connection = cpp11::make_unique<TcpHandler>(
         _looper.get(), std::move(socket), InetAddress{/*NONE*/}, _serverAddress);
     tcpCallbackInit(_connection.get());
+    _connection->init();
 }
 
 inline void Client::retry() {
