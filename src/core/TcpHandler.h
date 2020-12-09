@@ -86,6 +86,10 @@ public:
         }
     }
 
+    void init() {
+        _ctx->enableRead();
+    }
+
 
     TcpHandler(Looper *looper, Socket acceptedSocket,
                 InetAddress localAddress, InetAddress peerAddress)

@@ -17,6 +17,7 @@ public:
     Client(Looper *looper, InetAddress serverAddress)
         : _looper(looper), _serverAddress(serverAddress) {}
 
+    void start() { connect(); }
     void connect();
     // void disconnect();
     // void stop();
