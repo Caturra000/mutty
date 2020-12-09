@@ -16,7 +16,7 @@
 class Socket: public Noncopyable {
 public:
     static constexpr int INVALID_FD = -1;
-    Socket(): _socketFd(socket(AF_INET, SOCK_STREAM, 0)) 
+    Socket(): _socketFd(socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0)) 
         { if(_socketFd < 0) throw SocketCreateException(errno); }
     ~Socket() { if(_socketFd != INVALID_FD) ::close(_socketFd); }
     explicit Socket(int socketFd): _socketFd(socketFd) { assert(_socketFd != INVALID_FD); } // unsafe
