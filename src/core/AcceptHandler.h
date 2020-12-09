@@ -41,7 +41,7 @@ public:
 
 
     AcceptHandler(Looper *looper, InetAddress localAddress)
-        : _ctx(std::make_shared<AcceptContext>(this, looper, localAddress)) {} // TODO bind listen
+        : _ctx(std::make_shared<AcceptContext>(this, looper, localAddress)) {}
 
 
     void init() {

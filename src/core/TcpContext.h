@@ -14,7 +14,7 @@
 
 // 按照逻辑上，应该由Accept过程生成
 class TcpHandler;
-class TcpContext: public ContextImpl/*, public std::enable_shared_from_this<TcpContext>*/ {
+class TcpContext: public ContextImpl, public std::enable_shared_from_this<TcpContext> {
 public:
     
 // 状态机
@@ -72,7 +72,12 @@ public:
     }
 
     void forceClose(Nanosecond delay) {
-        scheduler->runAfter(delay).with([/*shared_from*/this] { forceClose(); });
+        std::weak_ptr<TcpContext> _this = shared_from_this();
+        scheduler->runAfter(delay).with([_this] { 
+            if(auto context = _this.lock()) {
+                context->forceClose();
+            }
+        });
     }
 
     void send(const std::string &str) {
