@@ -87,8 +87,14 @@ public:
     }
 
     void init() {
-        _ctx->enableRead();
-        _connectionCallback();
+        std::weak_ptr<TcpContext> context = _ctx;
+        
+        _ctx->scheduler->runAt(now()).with([this, context] {
+            if(auto ctx = context.lock()) {
+                ctx->enableRead();
+                _connectionCallback();
+            }
+        });
     }
 
 
