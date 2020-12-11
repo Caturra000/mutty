@@ -1,5 +1,6 @@
 #ifndef __SOCKET_ERRNO_EXCEPTION_H__
 #define __SOCKET_ERRNO_EXCEPTION_H__
+#include <cstring>
 #include "MuttyException.h"
 class ErrnoException: public MuttyException {
 private:
@@ -11,5 +12,6 @@ public:
         : MuttyException(info), _err(err) { }
     ErrnoException(int err): ErrnoException(TAG, err) { }
     int errorCode() { return _err; }
+    const char* errorMessage() { return strerror(_err); }
 };
 #endif
