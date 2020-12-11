@@ -88,6 +88,7 @@ public:
 
     void init() {
         _ctx->enableRead();
+        _connectionCallback();
     }
 
 
