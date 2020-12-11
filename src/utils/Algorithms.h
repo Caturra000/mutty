@@ -14,17 +14,17 @@ auto isPowerOfTwo = [](int v) { return v == lowbit(v); };
 auto highestBitPosition = [](int v) { 
     for(int i = 31; ~i; --i) {
         if(v>>i&1) return i;
-        return 0;
     }
+    return 0;
 };
 
-auto findCeilOfPowerOfTwo = [](int v) {
+auto ceilOfPowerOfTwo = [](int v) {
     int n = highestBitPosition(v);
     if(isPowerOfTwo(v)) return n;
     return n+1;
 };
 
-auto findFloorOfPowerOfTwo = [](int v) {
+auto floorOfPowerOfTwo = [](int v) {
     int n = highestBitPosition(v);
     if(isPowerOfTwo(v)) return n;
     return n-1;

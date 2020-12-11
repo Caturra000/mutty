@@ -39,6 +39,8 @@ public:
     virtual bool readEnabled() { return false; }
     virtual bool writeEnabled() { return false;}
     // add remove change
+
+    virtual ~Context() {}
 };
 
 // using ContextImpl = Context;

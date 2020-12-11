@@ -80,6 +80,11 @@ public:
         });
     }
 
+    template <size_t N>
+    void send(const char (&data)[N]) {
+        send(data, N);
+    }
+
     void send(const std::string &str) {
         send(str.c_str(), str.length());
     }

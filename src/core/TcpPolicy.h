@@ -30,8 +30,7 @@ struct TcpPolicy {
 
 template <typename T>
 struct TcpPolicyImpl: public TcpPolicy {
-    //using DecayT = typename std::decay<T>::type;
-    T runtimeInfo;
+    typename std::decay<T>::type runtimeInfo;
     TcpPolicyImpl(T info): runtimeInfo(std::move(info)) {}
     void onConnect(TcpHandler *connection) override
         { connection->onConnect(runtimeInfo);} // copy

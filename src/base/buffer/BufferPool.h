@@ -32,14 +32,14 @@ class BufferPool {
 public:
     // TODO 用于TcpCtx的构造
     CachedBuffer obtain(int sizeHint = 128) { // FIXME: 不允许有0大小的buffer
-        int n = findCeilOfPowerOfTwo(sizeHint);
+        int n = ceilOfPowerOfTwo(sizeHint);
         if(!_pool[n].empty()) {
             auto cachedBuffer = std::move(_pool[n].back());
             _pool[n].pop_back();
             return cachedBuffer;
         }
         return CachedBuffer(roundToPowerOfTwo(sizeHint), [this](CachedBuffer &buffer) {
-            int n = findFloorOfPowerOfTwo(buffer.size());
+            int n = floorOfPowerOfTwo(buffer.size());
             buffer.clear();
             _pool[n].emplace_back(std::move(buffer));
         });

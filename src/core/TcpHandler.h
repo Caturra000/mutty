@@ -88,9 +88,9 @@ public:
 
     void init() {
         std::weak_ptr<TcpContext> context = _ctx;
-        
         _ctx->scheduler->runAt(now()).with([this, context] {
             if(auto ctx = context.lock()) {
+                ctx->setConnected();
                 ctx->enableRead();
                 _connectionCallback();
             }

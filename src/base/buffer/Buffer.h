@@ -101,7 +101,7 @@ inline void Buffer::reuseIfPossible() {
 
 inline void Buffer::gc() {
     if(_r > 0) {
-        // move [_r, _w] to front
+        // move [_r, _w) to front
         memmove(_buf.data(), _buf.data() + _r, _w = unread());
         _r = 0;
     }
@@ -112,8 +112,7 @@ inline void Buffer::gc(int hint) {
     gc();
     // still cannot store
     if(hint > available()) {
-        // TODO expand    exactly or powerOf2?
-        int appendSize = available() - hint;
+        int appendSize =  hint - available();
         int expectSize = _buf.size() + appendSize;
         expandTo(/*_capacity = */roundToPowerOfTwo(expectSize));
     }
