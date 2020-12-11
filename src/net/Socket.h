@@ -96,7 +96,8 @@ inline void Socket::listen(int backlog) {
 
 
 inline Socket Socket::accept(InetAddress &address) {
-    int connectFd = ::accept4(_socketFd, (sockaddr*)(&address), nullptr,
+    socklen_t len = sizeof(address);
+    int connectFd = ::accept4(_socketFd, (sockaddr*)(&address), &len,
                         SOCK_NONBLOCK | SOCK_CLOEXEC);
     if(connectFd < 0) throw SocketAcceptException(errno);
     return Socket(connectFd);
