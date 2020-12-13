@@ -57,8 +57,6 @@ public:
 
 public:
 
-    // TODO: exception类型需要定义
-
 // wrapper
 
     void bind(const InetAddress &address);
@@ -81,6 +79,7 @@ public:
     // 更多的tcp/socket选项还是给unix api来做吧
 
 // for client usage
+
     void setBlock();
     void setNonBlock();
 
@@ -131,7 +130,7 @@ inline void Socket::setNoDelay(bool on) {
     int optval = on;
     if(setsockopt(_socketFd, IPPROTO_TCP, TCP_NODELAY, &optval,
             static_cast<socklen_t>(sizeof optval))) {
-        throw std::exception();
+        throw SocketException(errno);
     }
 }
 
@@ -139,7 +138,7 @@ inline void Socket::setReuseAddr(bool on) {
     int optval = on;
     if(setsockopt(_socketFd, SOL_SOCKET, SO_REUSEADDR, &optval,
             static_cast<socklen_t>(sizeof optval))) {
-        throw std::exception();
+        throw SocketException(errno);
     }
 }
 
@@ -147,7 +146,7 @@ inline void Socket::setReusePort(bool on) {
     int optval = on;
     if(setsockopt(_socketFd, SOL_SOCKET, SO_REUSEPORT, &optval,
             static_cast<socklen_t>(sizeof optval))) {
-        throw std::exception();
+        throw SocketException(errno);
     }
 }
 
@@ -155,7 +154,7 @@ inline void Socket::setKeepAlive(bool on) {
     int optval = on;
     if(setsockopt(_socketFd, SOL_SOCKET, SO_KEEPALIVE, &optval,
             static_cast<socklen_t>(sizeof optval))) {
-        throw std::exception();
+        throw SocketException(errno);
     }
 }
 
