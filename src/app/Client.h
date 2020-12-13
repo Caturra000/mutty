@@ -59,8 +59,6 @@ private:
 void Client::connect() {
     Socket socket;
     socket.setBlock(); // for connecting convenience
-    sockaddr_in addr {AF_INET};
-    socket.bind(InetAddress(addr));
     int ret = socket.connect(_serverAddress);
     int err = (ret == 0) ? 0 : errno;
     switch (err) {
