@@ -3,6 +3,7 @@
 
 
 #include <bits/stdc++.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -16,7 +17,7 @@
 class Socket: public Noncopyable {
 public:
     static constexpr int INVALID_FD = -1;
-    Socket(): _socketFd(socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0)) 
+    Socket(): _socketFd(socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)) 
         { if(_socketFd < 0) throw SocketCreateException(errno); }
     ~Socket() { if(_socketFd != INVALID_FD) ::close(_socketFd); }
     explicit Socket(int socketFd): _socketFd(socketFd) { assert(_socketFd != INVALID_FD); } // unsafe
@@ -61,8 +62,8 @@ public:
 // wrapper
 
     void bind(const InetAddress &address);
-    void listen(int backlog = 128);
-    void bindAndListen(const InetAddress &serverAddress, int backlog) 
+    void listen(int backlog = SOMAXCONN);
+    void bindAndListen(const InetAddress &serverAddress, int backlog = SOMAXCONN) 
         { bind(serverAddress); listen(backlog); }
     Socket accept(InetAddress &clientAddress);
     Socket accept();
@@ -78,6 +79,10 @@ public:
     void setKeepAlive(bool on = true);
 
     // 更多的tcp/socket选项还是给unix api来做吧
+
+// for client usage
+    void setBlock();
+    void setNonBlock();
 
 private:
     int _socketFd;
@@ -155,8 +160,15 @@ inline void Socket::setKeepAlive(bool on) {
 }
 
 
+inline void Socket::setBlock() {
+    int flags = ::fcntl(_socketFd, F_GETFL, 0);
+    ::fcntl(_socketFd, F_SETFL, flags & (~SOCK_NONBLOCK));
+}
 
-
+inline void Socket::setNonBlock() {
+    int flags = ::fcntl(_socketFd, F_GETFL, 0);
+    ::fcntl(_socketFd, F_SETFL, flags | SOCK_NONBLOCK);
+}
 
 
 #endif

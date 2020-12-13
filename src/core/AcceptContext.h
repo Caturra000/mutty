@@ -29,10 +29,6 @@ public:
         : ContextImpl(handler, looper),
           localAddress(localAddress) {
         using Option = Socket::Option;
-        // TEMP
-        int socketFd = acceptSocket.fd();
-        int flags = ::fcntl(socketFd, F_GETFL, 0);
-        ::fcntl(socketFd, F_SETFL, flags | SOCK_NONBLOCK);
         acceptSocket.config(Option::REUSE_PORT | Option::REUSE_ADDR);
         acceptSocket.bind(localAddress);
     }

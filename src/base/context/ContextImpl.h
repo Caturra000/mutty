@@ -52,10 +52,30 @@ public:
         }
     }
 
-    void enableRead()   override { _events |= EVENT_READ; updateState(); }
-    void enableWrite()  override { _events |= EVENT_WRITE; updateState(); }
-    void disableRead()  override { _events &= ~EVENT_READ; updateState(); }
-    void disableWrite() override { _events &= ~EVENT_WRITE; updateState(); }
+    void enableRead()   override {
+        if(!(_events & EVENT_READ)) {
+            _events |= EVENT_READ;
+            updateState(); 
+        }
+    }
+    void enableWrite()  override {
+        if(!(_events & EVENT_WRITE)) {
+            _events |= EVENT_WRITE;
+            updateState(); 
+        }
+    }
+    void disableRead()  override {
+        if(_events & EVENT_READ) {
+            _events &= ~EVENT_READ;
+            updateState();
+        }
+    }
+    void disableWrite() override {
+        if(_events & EVENT_WRITE) {
+            _events &= ~EVENT_WRITE;
+            updateState();
+        }
+    }
     bool readEnabled()  override { return _events & EVENT_READ; }
     bool writeEnabled() override { return _events & EVENT_WRITE; }
     // error / close

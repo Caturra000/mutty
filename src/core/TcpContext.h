@@ -124,5 +124,9 @@ public:
           peerAddress(peerAddress),
           scheduler(looper ? looper->getScheduler() : nullptr) {}
 
+    // virtual ~TcpContext() { // Thread safe?
+    //     disableRead();
+    //     disableWrite();
+    // }
 };
 #endif

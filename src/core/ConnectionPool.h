@@ -44,7 +44,7 @@ private:
         if(_reusableIndex != 0) { // need GC
             for(int _ = 0; _ < step; ++_) {
                 if(_window.left > _window.right) { // 未启动
-                    if(_container[_window.left] == nullptr) { // 可以启动
+                    if(isResuable(_container[_window.left])) { // 可以启动
                         ++_window.right;
                     } else { // 零大小窗口整体右滑，仍未启动
                         ++_window.left;
@@ -61,7 +61,7 @@ private:
                 if(_window.right + 1 == _reusableIndex) { // merge, [left,right] + [reuse,size()) 全是nullptr，可回收
                     _reusableIndex = _window.left;
                     resetWindow(); // close window
-                } else if(_container[_window.right + 1] == nullptr) {
+                } else if(isResuable(_container[_window.right + 1])) {
                     ++_window.right;
                 } else { // 没有触发到reuse，但是找到一个可用连接
                     std::swap(_container[++_window.right],
@@ -82,6 +82,11 @@ private:
     constexpr static int step = 2;
 
     LooperPool<N> _looperPool;
+
+
+    bool isResuable(const std::unique_ptr<TcpHandler> &connection) {
+        return connection == nullptr || connection->isContextDisconnected();
+    }
 };
 
 

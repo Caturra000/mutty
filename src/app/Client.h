@@ -58,17 +58,19 @@ private:
 
 void Client::connect() {
     Socket socket;
+    socket.setBlock(); // for connecting convenience
     sockaddr_in addr {AF_INET};
     socket.bind(InetAddress(addr));
     int ret = socket.connect(_serverAddress);
     int err = (ret == 0) ? 0 : errno;
     switch (err) {
         case 0:
+            connecting(std::move(socket));
+        break;
         case EINPROGRESS:
         case EINTR:
         case EISCONN:
-            connecting(std::move(socket));
-        break;
+            // if nonblock, connecting here
         case EAGAIN:
         case EADDRINUSE:
         case EADDRNOTAVAIL:
@@ -83,9 +85,10 @@ void Client::connect() {
 }
 
 inline void Client::connecting(Socket socket) {
+    socket.setNonBlock();
     _connection = cpp11::make_unique<TcpHandler>(
         _looper.get(), std::move(socket), InetAddress{/*NONE*/}, _serverAddress);
-    tcpCallbackInit(_connection.get());
+    tcpCallbackInit(_connection.get()); // FIXME EINPROGRESS EINTR
     _connection->init();
 }
 

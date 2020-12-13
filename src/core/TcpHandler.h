@@ -97,6 +97,10 @@ public:
         });
     }
 
+    bool isContextDisconnected() {
+        return _ctx->isDisConnected();
+    }
+
 
     TcpHandler(Looper *looper, Socket acceptedSocket,
                 InetAddress localAddress, InetAddress peerAddress)
