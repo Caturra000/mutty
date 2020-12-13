@@ -85,7 +85,14 @@ public:
         return n;
     }
 
+// simple output
 
+    friend std::ostream& operator << (std::ostream &os, Buffer &buf) {
+        auto iter = buf.readBuffer();
+        const auto bound = buf.writeBuffer();
+        while(iter != bound) os << *iter++;
+        return os;
+    }
 };
 
 
