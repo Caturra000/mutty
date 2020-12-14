@@ -49,9 +49,9 @@ T toDec(const std::string &str) {
 template <size_t N>
 class Liner {
 public:
-    std::pair<const char*, size_t> getline() {
+    std::pair<const char*, size_t> getline(std::istream &in = std::cin) {
         if(cur > N) clear();
-        std::cin.getline(_buf + cur, M - cur);
+        in.getline(_buf + cur, M - cur);
         size_t bound = strlenFast();
         auto result = std::make_pair(_buf + cur, bound - cur);
         cur = bound;
