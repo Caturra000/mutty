@@ -85,7 +85,7 @@ private:
             else lo = mid + 1;
         }
         lo = ((lo ? lo-1 : lo) << 3);
-        for(int i = lo, j = lo + 8; i < j; ++i) {
+        for(int i = lo, j = lo + 8; i <= j; ++i) { // 恰为8的倍数时需要=
             if(_buf[i] == '\0') return i;
         }
         return M-1;
