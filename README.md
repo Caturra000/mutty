@@ -15,19 +15,18 @@
 int main() {
     Looper looper;
     Server server(&looper, InetAddress("127.0.0.1", 2333));
-    
+
     server.onConnect([] {
         std::cout << "connection created." << std::endl;
     });
-    
+
     server.onMessage([](TcpContext *ctx) {
         auto &buf = ctx->inputBuffer;
-        auto it = buf.readBuffer();
-        std::cout << buf;
+        std::cout << buf << std::endl;
         ctx->send(buf.readBuffer(), buf.unread());
         buf.read(buf.unread());
     });
-    
+
     server.onClose([] {
         std::cout << "connection close." << std::endl;
     });
@@ -46,25 +45,25 @@ int main() {
 
 void printConnected() { std::cout << "[client] connected." << std::endl; }
 auto listenKeyboard = [](std::weak_ptr<TcpContext> context) {
-    char buf[1<<16];
-    while(std::cin.getline(buf, sizeof(buf))) {
+    FastIo<1<<16> io;
+    while(auto result = io.getline()) {
         if(auto ctx = context.lock()) {
-            ctx->send(buf, strlen(buf));
-            ctx->send("\n");
+            ctx->send(result.buf, result.len);
         } else {
             break;
         }
     }
 };
+
 int main() {
     Looper looper;
     Client client(&looper, InetAddress("127.0.0.1", 2333));
-    
+
     client.onConnect([&](std::weak_ptr<TcpContext> ctx) {
         printConnected();
         std::thread(listenKeyboard, ctx).detach();
     });
-    
+
     client.onClose([&] {
         std::cout << "[client] close." << std::endl;
         looper.stop();
