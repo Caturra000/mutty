@@ -45,4 +45,52 @@ T toDec(const std::string &str) {
     return dec;
 }
 
+// stack
+template <size_t N>
+class Liner {
+public:
+    std::pair<const char*, size_t> getline() {
+        if(cur > N) clear();
+        std::cin.getline(_buf + cur, M - cur);
+        size_t bound = strlenFast();
+        auto result = std::make_pair(_buf + cur, bound - cur);
+        cur = bound;
+        return result;
+    }
+
+private:
+    void clear() {
+        memset(_buf, 0, cur);
+        cur = 0;
+    }
+
+    // 求的是绝对值
+    size_t strlenFast() {
+        size_t lo = cur, hi = M-1;
+        while(lo < hi) {
+            size_t mid = lo + (hi-lo >> 1);
+            if(_buf[mid] == '\0') hi = mid;
+            else lo = mid+1;
+        }
+        return lo; // 第一个为'\0'的pos
+    }
+
+    size_t strlenFast2() {
+        size_t lo = cur >> 3;
+        size_t hi = M-1 >> 3;
+        while(lo < hi) {
+            size_t mid = lo + (hi-lo >> 1);
+            long long chars = *(long long*)(&_buf[mid << 3]);
+            // TODO
+            // if(!_buf[mid]) hi = mid;
+            // else lo = mid+1;
+        }
+        return lo;
+    }
+
+    static constexpr size_t M = N << 1;
+    char _buf[M] {};
+    size_t cur = 0;
+};
+
 #endif
