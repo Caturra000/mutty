@@ -6,6 +6,7 @@
 #include "utils/Object.h"
 #include "utils/TypeTraits.h"
 #include "utils/Compat.h"
+#include "utils/FastIo.h"
 #include "base/handler/MessageQueue.h"
 #include "core/Looper.h"
 #include "core/AcceptHandler.h"

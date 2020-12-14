@@ -5,6 +5,7 @@
 #include "utils/Timestamp.h"
 #include "utils/Callable.h"
 #include "utils/Compat.h"
+#include "utils/FastIo.h"
 #include "core/Looper.h"
 #include "core/ConnectionPool.h"
 #include "core/TcpHandler.h"
