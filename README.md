@@ -10,8 +10,8 @@
 
 ```C++
 #include <bits/stdc++.h>
-#include "app/Server.h"
-
+#include "mutty.hpp"
+using namespace mutty;
 int main() {
     Looper looper;
     Server server(&looper, InetAddress("127.0.0.1", 2333));
@@ -41,36 +41,30 @@ int main() {
 
 ```C++
 #include <bits/stdc++.h>
-#include "app/Client.h"
-
-void printConnected() { std::cout << "[client] connected." << std::endl; }
-auto listenKeyboard = [](std::weak_ptr<TcpContext> context) {
-    FastIo<1<<16> io;
-    while(auto result = io.getline()) {
-        if(auto ctx = context.lock()) {
-            ctx->send(result.buf, result.len);
-        } else {
-            break;
-        }
-    }
-};
-
+#include "mutty.hpp"
+using namespace mutty;
+void print(const char *message) { std::cout << message << std::endl; }
 int main() {
-    Looper looper;
-    Client client(&looper, InetAddress("127.0.0.1", 2333));
-
-    client.onConnect([&](std::weak_ptr<TcpContext> ctx) {
-        printConnected();
-        std::thread(listenKeyboard, ctx).detach();
-    });
-
-    client.onClose([&] {
-        std::cout << "[client] close." << std::endl;
-        looper.stop();
-    });
+    AsyncLooperContainer container;
+    Client client(container.get(), InetAddress("127.0.0.1", 2333));
     
+    client.onConnect(print, "[client] connected.");
+    client.onClose([&] {
+        print("[client] closed.");
+        auto looper = container.get();
+        looper->getScheduler()->runAt(now())
+            .with([&] { looper->stop(); });
+    });
+
     client.start();
-    looper.loop();
+    FastIo<65536> io;
+    while(auto result = io.getline()) {
+        client.startTransaction([=, &client] {
+            client.send(result.buf, result.len);
+        }).then([&] {
+            print("[client] result has been sent to buffer.");
+        }).commit();
+    }
     return 0;
 }
 ```
