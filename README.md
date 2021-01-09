@@ -52,8 +52,7 @@ int main() {
     client.onClose([&] {
         print("[client] closed.");
         auto looper = container.get();
-        looper->getScheduler()->runAt(now())
-            .with([&] { looper->stop(); });
+        looper->stop();
     });
 
     client.start();
