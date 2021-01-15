@@ -3,14 +3,12 @@
 #include <bits/stdc++.h>
 namespace mutty {
 
-class Defer {
-private:
-    using DeferImpl = std::__shared_ptr<Defer, std::_S_single>;
-    DeferImpl _defer;
+class Defer: std::__shared_ptr<Defer, std::_S_single> {
 public:
     template <typename T, typename ...Args>
-    Defer(T &&callable, Args &&...args)
-        : _defer(nullptr, [=](Defer*) { callable(std::move(args)...); }) { }
+    Defer(T &&func, Args &&...args)
+        : std::__shared_ptr<Defer, std::_S_single>
+          (nullptr, [=](Defer*) { func(std::move(args)...); }) {}
 };
 
 } // mutty
