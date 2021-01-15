@@ -5,7 +5,7 @@ namespace mutty {
 
 class Defer {
 private:
-    using DeferImpl = std::shared_ptr<Defer>;
+    using DeferImpl = std::__shared_ptr<Defer, std::_S_single>;
     DeferImpl _defer;
 public:
     template <typename T, typename ...Args>
