@@ -53,8 +53,7 @@ private:
             ctx->sendCloseMessage();
         }
         if(revent & (POLLERR | POLLNVAL)) {
-            if(!errno) ctx->sendCloseMessage(); // RST?
-            else ctx->sendErrorMessage();
+            ctx->sendErrorMessage();
         }
         if(revent & (POLLIN | POLLPRI | POLLRDHUP)) {
             ctx->sendReadMessage();

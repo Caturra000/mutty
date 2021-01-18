@@ -36,7 +36,7 @@ public:
     }
 
     // for async
-    void join() { while(!_hasEnabled || _looper->isReadyToStop() || _looper->onStop()); }
+    void join() { while(!_hasEnabled || !_looper->isReadyToStop() || _looper->onStop()); }
 
     // 提供给外部使用
     template <typename ...Args>
