@@ -6,10 +6,12 @@
 #include "utils/Callable.h"
 #include "utils/Compat.h"
 #include "utils/FastIo.h"
+#include "core/AsyncLooperContainer.h"
 #include "core/Looper.h"
 #include "core/ConnectionPool.h"
 #include "core/TcpHandler.h"
 #include "core/TcpPolicy.h"
+#include "core/Transaction.h"
 #include "net/InetAddress.h"
 #include "net/Socket.h"
 namespace mutty {
@@ -19,7 +21,7 @@ public:
     Client(Looper *looper, InetAddress serverAddress)
         : _looper(looper), _serverAddress(serverAddress) {}
 
-    void start() { connect(); }
+    std::future<bool> start();
     void connect();
     // void disconnect();
     // void stop();
@@ -34,38 +36,12 @@ public:
     }
 
     // for async
-    void join() { while(!_hasEnabled || _looper->onStop()); }
+    void join() { while(!_hasEnabled || _looper->isReadyToStop() || _looper->onStop()); }
 
-    // for async
-    // 用于合并提交，可处理分离的逻辑，并保证线程安全
-    class Transaction {
-    public:
-        template <typename ...Args>
-        Transaction(Client *thisClient, Args &&...args)
-            : _thisClient(thisClient),
-              _callable(Callable::make(std::forward<Args>(args)...)) {}
-        
-        template <typename ...Args>
-        Transaction& then(Args &&...args) {
-            auto callable = std::move(_callable);
-            _callable = Callable::make([=, callable = std::move(callable)] {
-                callable();
-                Callable::make(args...)();
-            });
-            return *this;
-        }
-        void commit() {
-            _thisClient->_looper->getScheduler()->runAt(now())
-                .with(std::move(_callable));
-        }
-    private:
-        Callable _callable;
-        Client *_thisClient;
-    };
-
+    // 提供给外部使用
     template <typename ...Args>
     Transaction startTransaction(Args &&...args) {
-        return Transaction(this, std::forward<Args>(args)...);
+        return Transaction(_looper.get(), std::forward<Args>(args)...);
     }
 
     TCP_POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy)
@@ -86,6 +62,7 @@ private:
     Millisecond _retryInterval {50ms};
     bool _retry {true};
     bool _hasEnabled {false};
+    std::promise<bool> _connectedPromise;
 
 // for TcpHandler
 
@@ -96,13 +73,14 @@ private:
 
 };
 
-// 把简单的消息循环放到异步线程中
-class AsyncLooperContainer {
-public:
-    Looper* get() { return _container.pick().get(); }
-private:
-    LooperPool<1> _container;
-};
+
+
+inline std::future<bool> Client::start() {
+    auto scheduler = _looper->getScheduler();
+    scheduler->runAt(now())
+        .with([this] { connect(); });
+    return _connectedPromise.get_future();
+}
 
 void Client::connect() {
     Socket socket;
@@ -137,6 +115,7 @@ inline void Client::connecting(Socket socket) {
     tcpCallbackInit(_connection.get()); // FIXME EINPROGRESS EINTR
     _connection->init();
     _hasEnabled = true;
+    _connectedPromise.set_value(true);
 }
 
 inline void Client::retry() {

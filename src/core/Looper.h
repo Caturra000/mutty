@@ -33,6 +33,7 @@ public:
 
     void stop() { _stop = true; }
     bool onStop() { return _provider.hasNextUnlock(); } // override
+    bool isReadyToStop() { return _stop; }
 
     Pointer<MessageQueue> getProvider() { return &_provider; }
     Pointer<Multiplexer> getPoller() { return &_poller; }
