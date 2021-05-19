@@ -2,15 +2,14 @@
 #define __CONTEXT_IMPL_H__
 #include <poll.h>
 #include <bits/stdc++.h>
-#include "Context.h"
+#include "base/context/Context.h"
+#include "base/handler/Handler.h"
 #include "base/handler/MessageQueue.h"
 #include "base/handler/Message.h"
 #include "utils/Pointer.h"
 #include "core/Looper.h"
 #include "core/Multiplexer.h"
 namespace mutty {
-
-class Handler;
 
 // 提供基本的poller接口支持以及handler机制默认实现
 // 具体的Context实现类可以直接继承，并给出fd

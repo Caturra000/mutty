@@ -7,7 +7,6 @@
 #include "utils/TypeTraits.h"
 #include "utils/Compat.h"
 #include "utils/FastIo.h"
-#include "base/handler/MessageQueue.h"
 #include "core/Looper.h"
 #include "core/AcceptHandler.h"
 #include "core/ConnectionPool.h"
@@ -19,9 +18,7 @@ class Server {
 public:
     Server(Looper *looper, InetAddress localAddress)
         : _looper(looper),
-          _acceptor(looper, localAddress) {
-       
-    }
+          _acceptor(looper, localAddress) {}
 
     // 二阶段构造，在start()前应处理好tcpHandler的回调注册
     void start() {
