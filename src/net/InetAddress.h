@@ -1,6 +1,5 @@
 #ifndef __INET_ADDRESS_H__
 #define __INET_ADDRESS_H__
-
 #include <unistd.h>
 #include <netinet/in.h>
 #include <string>

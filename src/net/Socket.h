@@ -23,9 +23,7 @@ public:
     explicit Socket(int socketFd): _socketFd(socketFd) { assert(_socketFd != INVALID_FD); } // unsafe
     Socket(Socket &&rhs): _socketFd(rhs._socketFd) { rhs._socketFd = INVALID_FD; }
     Socket& operator=(Socket &&rhs) {
-        if(this == &rhs) return *this;
-        _socketFd = rhs._socketFd;
-        rhs._socketFd = INVALID_FD;
+        Socket(static_cast<Socket&&>(rhs)).swap(*this);
         return *this;
     }
 
@@ -83,6 +81,8 @@ public:
 
     void setBlock();
     void setNonBlock();
+
+    void swap(Socket &that) { std::swap(this->_socketFd, that._socketFd); }
 
 private:
     int _socketFd;
