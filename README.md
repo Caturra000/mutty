@@ -12,24 +12,24 @@
 #include <bits/stdc++.h>
 #include "mutty.hpp"
 using namespace mutty;
+
+template <typename T>
+void print(T &&message, std::ostream &o = std::cout) { o << message << std::endl; }
+
 int main() {
     Looper looper;
-    Server server(&looper, InetAddress("127.0.0.1", 2333));
+    Server server(&looper, {"127.0.0.1", 2333});
 
-    server.onConnect([] {
-        std::cout << "connection created." << std::endl;
-    });
+    server.onConnect(::puts, "connection created.");
 
     server.onMessage([](TcpContext *ctx) {
         auto &buf = ctx->inputBuffer;
-        std::cout << buf << std::endl;
+        print(buf);
         ctx->send(buf.readBuffer(), buf.unread());
         buf.read(buf.unread());
     });
 
-    server.onClose([] {
-        std::cout << "connection close." << std::endl;
-    });
+    server.onClose([] { print("connection close."); });
     
     server.start();
     looper.loop();
@@ -43,26 +43,31 @@ int main() {
 #include <bits/stdc++.h>
 #include "mutty.hpp"
 using namespace mutty;
-void print(const char *message) { std::cout << message << std::endl; }
+
+template <typename T>
+void print(T &&message, std::ostream &o = std::cout) { o << message << std::endl; }
+
 int main() {
-    AsyncLooperContainer container;
-    Client client(container.get(), InetAddress("127.0.0.1", 2333));
-    
-    client.onConnect(print, "[client] connected.");
+    ClientLooper clooper;
+    Client client(clooper, {"127.0.0.1", 2333});
+    std::weak_ptr<TcpContext> chat; // safe
+    client.onConnect([&](std::weak_ptr<TcpContext> ctx) {
+        chat = ctx;
+        print("[client] connected.");
+    });
     client.onClose([&] {
         print("[client] closed.");
-        auto looper = container.get();
+        auto looper = clooper.get();
         looper->stop();
     });
-
-    client.start();
-    FastIo<65536> io;
-    while(auto result = io.getline()) {
-        client.startTransaction([=, &client] {
-            client.send(result.buf, result.len);
-        }).then([&] {
+    client.connect(); // async
+    for(std::string s; std::getline(std::cin, s);) {
+        if(auto ctx = chat.lock()) {
+            ctx->send(s);
             print("[client] result has been sent to buffer.");
-        }).commit();
+        } else {
+            print("[client] send failed. check connection status.", std::cerr);
+        }
     }
     return 0;
 }

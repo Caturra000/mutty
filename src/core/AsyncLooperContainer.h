@@ -9,9 +9,13 @@ namespace mutty {
 class AsyncLooperContainer {
 public:
     Looper* get() { return _container.pick().get(); }
+
+    operator Looper*() { return get(); }
 private:
     LooperPool<1> _container;
 };
+
+using ClientLooper = AsyncLooperContainer;
 
 } // mutty
 
