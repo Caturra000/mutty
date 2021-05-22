@@ -36,6 +36,11 @@ public:
     void sendErrorMessage() override { sendMessage(MSG_POLL_ERROR); }
     void sendCloseMessage() override { sendMessage(MSG_POLL_CLOSE); }
 
+    template <typename ...Args>
+    void async(Args &&...args) {
+        _looper->getScheduler()->runAt(now())
+            .with(Callable::make(std::forward<Args>(args)...));
+    }
 
     uint32_t events() const override { return _events; }
     void updateState() override {
@@ -82,6 +87,7 @@ public:
 
     ContextImpl(Handler *handler = nullptr, Looper *looper = nullptr)
         : _handler(handler),
+          _looper(looper),
           _messageQueue(looper ? looper->getProvider() : nullptr),
           _multiplexer(looper ? looper->getPoller() : nullptr),
           _state(STATE_NEW), _events(EVENT_NONE) { }
@@ -90,6 +96,7 @@ public:
 
 protected:
     Pointer<Handler> _handler;
+    Pointer<Looper> _looper;
     Pointer<MessageQueue> _messageQueue;
     Pointer<Multiplexer> _multiplexer;
 
