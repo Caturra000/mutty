@@ -12,11 +12,11 @@ using Millisecond = std::chrono::milliseconds;
 using Second = std::chrono::seconds;
 using Minute = std::chrono::minutes;
 using Hour = std::chrono::hours;
-using Timestamp = std::chrono::time_point<std::chrono::system_clock, Nanosecond>;
+using Timestamp = std::chrono::system_clock::time_point;
 
-Timestamp now() { return std::chrono::system_clock::now(); }
-Timestamp nowAfter(Nanosecond interval) { return now() + interval; }
-Timestamp nowBefore(Nanosecond interval) { return now() - interval; }
+inline Timestamp now() { return std::chrono::system_clock::now(); }
+inline Timestamp nowAfter(Nanosecond interval) { return now() + interval; }
+inline Timestamp nowBefore(Nanosecond interval) { return now() - interval; }
 
 } // mutty
 #endif
