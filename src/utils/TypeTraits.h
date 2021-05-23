@@ -1,5 +1,5 @@
-#ifndef __UTILS_TYPE_TRAITS_H__
-#define __UTILS_TYPE_TRAITS_H__
+#ifndef __MUTTY_TYPE_TRAITS_H__
+#define __MUTTY_TYPE_TRAITS_H__
 #include <functional>
 namespace mutty {
 

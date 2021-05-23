@@ -1,9 +1,8 @@
-#ifndef __UTILS_OBJECT_H__
-#define __UTILS_OBJECT_H__
+#ifndef __MUTTY_OBJECT_H__
+#define __MUTTY_OBJECT_H__
 #include <bits/stdc++.h>
 namespace mutty {
 
-// 实现C++11下的std::any
 class Object final {
 public:
 

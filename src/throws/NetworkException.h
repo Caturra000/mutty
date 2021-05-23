@@ -1,5 +1,5 @@
-#ifndef __NETWORK_EXCEPTION_H__
-#define __NETWORK_EXCEPTION_H__
+#ifndef __MUTTY_NETWORK_EXCEPTION_H__
+#define __MUTTY_NETWORK_EXCEPTION_H__
 #include "ErrnoException.h"
 namespace mutty {
 

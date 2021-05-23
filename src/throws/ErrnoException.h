@@ -1,5 +1,5 @@
-#ifndef __SOCKET_ERRNO_EXCEPTION_H__
-#define __SOCKET_ERRNO_EXCEPTION_H__
+#ifndef __MUTTY_ERRNO_EXCEPTION_H__
+#define __MUTTY_ERRNO_EXCEPTION_H__
 #include <cstring>
 #include "MuttyException.h"
 namespace mutty {

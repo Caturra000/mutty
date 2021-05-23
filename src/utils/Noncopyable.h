@@ -1,7 +1,8 @@
-#ifndef __UTILS_NONCOPYABLE_H__
-#define __UTILS_NONCOPYABLE_H__
+#ifndef __MUTTY_NON_COPYABLE_H__
+#define __MUTTY_NON_COPYABLE_H__
 namespace mutty {
 
+// TODO
 class Noncopyable {
 protected:
     //Noncopyable( const Noncopyable& ) = delete;

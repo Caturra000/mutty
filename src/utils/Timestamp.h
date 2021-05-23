@@ -1,11 +1,10 @@
-#ifndef __UTILS_TIMESTAMP_H__
-#define __UTILS_TIMESTAMP_H__
+#ifndef __MUTTY_TIMESTAMP_H__
+#define __MUTTY_TIMESTAMP_H__
 #include <chrono>
 namespace mutty {
 
 // using std::chrono::system_clock;
 using namespace std::literals::chrono_literals;
-
 
 using Nanosecond = std::chrono::nanoseconds;
 using Microsecond = std::chrono::microseconds;

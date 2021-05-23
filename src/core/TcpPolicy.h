@@ -1,9 +1,8 @@
-#ifndef __TCP_POLICY_H__
-#define __TCP_POLICY_H__
+#ifndef __MUTTY_TCP_POLICY_H__
+#define __MUTTY_TCP_POLICY_H__
 #include <bits/stdc++.h>
 #include "core/TcpHandler.h"
 namespace mutty {
-
 
 #define TCP_POLICY_CALLBACK_DEFINE(callback, policy) \
     template <typename ...Args, typename = IsCallableType<Args...>> \
@@ -16,9 +15,6 @@ namespace mutty {
         policy = cpp11::make_unique<TcpPolicyImpl<Lambda>>(std::forward<Lambda>(functor)); \
     } 
 
-
-
-// 用于泛型擦除
 struct TcpPolicy {
     //virtual void setHandler(TcpHandler*) = 0;
     virtual void onConnect(TcpHandler*) = 0;
@@ -34,13 +30,13 @@ struct TcpPolicyImpl: public TcpPolicy {
     typename std::decay<T>::type runtimeInfo;
     TcpPolicyImpl(T info): runtimeInfo(std::move(info)) {}
     void onConnect(TcpHandler *connection) override
-        { connection->onConnect(runtimeInfo);} // copy
+        { connection->onConnect(runtimeInfo); } // copy
     void onMessage(TcpHandler *connection) override
-        { connection->onMessage(runtimeInfo);}
+        { connection->onMessage(runtimeInfo); }
     void onWriteComplete(TcpHandler *connection) override
-        { connection->onWriteComplete(runtimeInfo);}
+        { connection->onWriteComplete(runtimeInfo); }
     void onClose(TcpHandler *connection) override
-        { connection->onClose(runtimeInfo);} 
+        { connection->onClose(runtimeInfo); } 
 };
 
 } // mutty

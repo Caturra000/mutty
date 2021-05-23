@@ -1,12 +1,10 @@
-#ifndef __UTILS_STRING_UTILS_H__
-#define __UTILS_STRING_UTILS_H__
+#ifndef __MUTTY_STRING_UTILS_H__
+#define __MUTTY_STRING_UTILS_H__
 #include <bits/stdc++.h>
 namespace mutty {
 
-
-// 只能用于文本，二进制流不兼容
 std::vector<std::pair<int, int>>
-split(const char *str, const char pivot = ' ') {
+inline split(const char *str, const char pivot = ' ') {
     std::vector<std::pair<int, int>> result;
     int lo = 0, hi = 0;
     while(*str) {
@@ -19,7 +17,7 @@ split(const char *str, const char pivot = ' ') {
 }
 
 std::vector<std::pair<int, int>>
-split(const char *str, int length, const char pivot = ' ') {
+inline split(const char *str, int length, const char pivot = ' ') {
     std::vector<std::pair<int, int>> result;
     int lo = 0, hi = 0;
     while(length) {
@@ -32,12 +30,12 @@ split(const char *str, int length, const char pivot = ' ') {
 }
 
 std::vector<std::pair<int, int>>
-split(const std::string &str, const char pivot = ' ') {
+inline split(const std::string &str, const char pivot = ' ') {
     return split(str.c_str(), str.length(), pivot);
 }
 
 template<typename T>
-T toDec(const std::string &str) {
+inline T toDec(const std::string &str) {
     static_assert(std::is_integral<T>::value, "T must be integral");
     T dec = 0;
     for(auto c : str) {

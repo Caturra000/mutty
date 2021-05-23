@@ -1,5 +1,5 @@
-#ifndef __MUTTY_EXCEPTION_H__
-#define __MUTTY_EXCEPTION_H__
+#ifndef __MUTTY_MUTTY_EXCEPTION_H__
+#define __MUTTY_MUTTY_EXCEPTION_H__
 #include <bits/stdc++.h>
 namespace mutty {
 

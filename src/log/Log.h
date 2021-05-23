@@ -1,5 +1,5 @@
-#ifndef _LOG_H__
-#define _LOG_H__
+#ifndef __MUTTY_LOG_H__
+#define __MUTTY_LOG_H__
 // https://github.com/caturra000/dlog
 // portable single header version
 // autogen by https://github.com/JamesBoer/Heady

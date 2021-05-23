@@ -1,88 +1,66 @@
-#ifndef __SOCKET_H__
-#define __SOCKET_H__
-#include <bits/stdc++.h>
+#ifndef __MUTTY_SOCKET_H__
+#define __MUTTY_SOCKET_H__
 #include <fcntl.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <bits/stdc++.h>
 #include "utils/Noncopyable.h"
-#include "InetAddress.h"
-#include "netinet/tcp.h"
 #include "throws/Exceptions.h"
+#include "InetAddress.h"
 namespace mutty {
 
-
-// 针对socket fd的浅层封装，要求只有fd一个成员
 class Socket: public Noncopyable {
 public:
-    static constexpr int INVALID_FD = -1;
-    Socket(): _socketFd(socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)) 
-        { if(_socketFd < 0) throw SocketCreateException(errno); }
-    ~Socket() { if(_socketFd != INVALID_FD) ::close(_socketFd); }
-    explicit Socket(int socketFd): _socketFd(socketFd) { assert(_socketFd != INVALID_FD); } // unsafe
-    Socket(Socket &&rhs): _socketFd(rhs._socketFd) { rhs._socketFd = INVALID_FD; }
-    Socket& operator=(Socket &&rhs) {
-        Socket(static_cast<Socket&&>(rhs)).swap(*this);
-        return *this;
-    }
-
-    // int fd = std::move(socket);
-    operator int() && {
-        int fd = _socketFd;
-        _socketFd = INVALID_FD;
-        return fd;
-    }
-    
-    // TODO remove
-    struct Option {
-        const static int NO_DELAY   = 1 << 0;
-        const static int REUSE_ADDR = 1 << 1;
-        const static int REUSE_PORT = 1 << 2;
-        const static int KEEP_ALIVE = 1 << 3;
-
-        const static int DEFAULT      = 0;
-        const static int FULL_FEATURE = std::numeric_limits<int>::max(); // (1LL << 31) - 1; 
-
-        const int _option;
-
-        Option(int option = DEFAULT): _option(option) {}
-    };
-
     int fd() const { return _socketFd; }
 
+    struct Option;
     void config(Option option);
-
-
-public:
-
-// wrapper
 
     void bind(const InetAddress &address);
     void listen(int backlog = SOMAXCONN);
-    void bindAndListen(const InetAddress &serverAddress, int backlog = SOMAXCONN) 
-        { bind(serverAddress); listen(backlog); }
     Socket accept(InetAddress &clientAddress);
     Socket accept();
     int connect(const InetAddress &address);
     void detach() { _socketFd = INVALID_FD; }
     void shutdown() { ::shutdown(_socketFd, SHUT_WR); }
 
-// setter
-
     void setNoDelay(bool on = true);
     void setReuseAddr(bool on = true);
     void setReusePort(bool on = true);
     void setKeepAlive(bool on = true);
-
-    // 更多的tcp/socket选项还是给unix api来做吧
-
-// for client usage
-
     void setBlock();
     void setNonBlock();
 
     void swap(Socket &that) { std::swap(this->_socketFd, that._socketFd); }
+
+    static constexpr int INVALID_FD = -1;
+
+    // TODO remove
+    struct Option {
+        constexpr static int NO_DELAY   = 1 << 0;
+        constexpr static int REUSE_ADDR = 1 << 1;
+        constexpr static int REUSE_PORT = 1 << 2;
+        constexpr static int KEEP_ALIVE = 1 << 3;
+
+        constexpr static int DEFAULT      = 0;
+        constexpr static int FULL_FEATURE = std::numeric_limits<int>::max(); // (1LL << 31) - 1; 
+
+        const int _option;
+
+        Option(int option = DEFAULT): _option(option) {}
+    };
+
+    Socket();
+    ~Socket();
+    explicit Socket(int socketFd): _socketFd(socketFd) { assert(_socketFd != INVALID_FD); }
+    Socket(Socket &&rhs): _socketFd(rhs._socketFd) { rhs._socketFd = INVALID_FD; }
+    Socket& operator=(Socket &&rhs);
+
+    // int fd = std::move(socket);
+    operator int() &&;
 
 private:
     int _socketFd;
@@ -115,7 +93,6 @@ inline Socket Socket::accept() {
 }
 
 inline int Socket::connect(const InetAddress &address) {
-    // 不抛出异常
     return ::connect(_socketFd, (const sockaddr *)(&address), sizeof(address));
 }
 
@@ -129,7 +106,7 @@ inline void Socket::config(Option option) {
 
 inline void Socket::setNoDelay(bool on) {
     int optval = on;
-    if(setsockopt(_socketFd, IPPROTO_TCP, TCP_NODELAY, &optval,
+    if(::setsockopt(_socketFd, IPPROTO_TCP, TCP_NODELAY, &optval,
             static_cast<socklen_t>(sizeof optval))) {
         throw SocketException(errno);
     }
@@ -137,7 +114,7 @@ inline void Socket::setNoDelay(bool on) {
 
 inline void Socket::setReuseAddr(bool on) {
     int optval = on;
-    if(setsockopt(_socketFd, SOL_SOCKET, SO_REUSEADDR, &optval,
+    if(::setsockopt(_socketFd, SOL_SOCKET, SO_REUSEADDR, &optval,
             static_cast<socklen_t>(sizeof optval))) {
         throw SocketException(errno);
     }
@@ -145,7 +122,7 @@ inline void Socket::setReuseAddr(bool on) {
 
 inline void Socket::setReusePort(bool on) {
     int optval = on;
-    if(setsockopt(_socketFd, SOL_SOCKET, SO_REUSEPORT, &optval,
+    if(::setsockopt(_socketFd, SOL_SOCKET, SO_REUSEPORT, &optval,
             static_cast<socklen_t>(sizeof optval))) {
         throw SocketException(errno);
     }
@@ -153,7 +130,7 @@ inline void Socket::setReusePort(bool on) {
 
 inline void Socket::setKeepAlive(bool on) {
     int optval = on;
-    if(setsockopt(_socketFd, SOL_SOCKET, SO_KEEPALIVE, &optval,
+    if(::setsockopt(_socketFd, SOL_SOCKET, SO_KEEPALIVE, &optval,
             static_cast<socklen_t>(sizeof optval))) {
         throw SocketException(errno);
     }
@@ -168,6 +145,30 @@ inline void Socket::setBlock() {
 inline void Socket::setNonBlock() {
     int flags = ::fcntl(_socketFd, F_GETFL, 0);
     ::fcntl(_socketFd, F_SETFL, flags | SOCK_NONBLOCK);
+}
+
+inline Socket::Socket()
+    : _socketFd(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)) {
+    if(_socketFd < 0) {
+        throw SocketCreateException(errno);
+    }
+}
+
+inline Socket::~Socket() {
+    if(_socketFd != INVALID_FD) {
+        ::close(_socketFd);
+    }
+}
+
+inline Socket& Socket::operator=(Socket &&rhs) {
+    Socket(static_cast<Socket&&>(rhs)).swap(*this);
+    return *this;
+}
+
+inline Socket::operator int() && {
+    int fd = _socketFd;
+    _socketFd = INVALID_FD;
+    return fd;
 }
 
 } // mutty

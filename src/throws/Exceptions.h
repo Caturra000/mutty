@@ -1,5 +1,5 @@
-#ifndef __THROWS_EXCEPTIONS_H__
-#define __THROWS_EXCEPTIONS_H__
+#ifndef __MUTTY_EXCEPTIONS_H__
+#define __MUTTY_EXCEPTIONS_H__
 
 #include "MuttyException.h"
     #include "ErrnoException.h"

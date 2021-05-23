@@ -1,13 +1,8 @@
-#ifndef __UTILS_CALLABLE_H__
-#define __UTILS_CALLABLE_H__
+#ifndef __MUTTY_CALLABLE_H__
+#define __MUTTY_CALLABLE_H__
 #include <bits/stdc++.h>
 namespace mutty {
 
-// @brief: a wrapper of std::function, mainly used for callback
-// @usage:
-//     auto callback = Callable::make(functor, args);
-//     // ....
-//     callback();
 class Callable {
 public:
     template <typename Func, typename ...Args>
@@ -31,6 +26,5 @@ protected:
     Functor _functor;
 };
 
-// IMRPOVEMENT: 提供CountDownCallable
 } // mutty
 #endif

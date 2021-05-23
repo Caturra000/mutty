@@ -1,5 +1,5 @@
-#ifndef __CLIENT_H__
-#define __CLIENT_H__
+#ifndef __MUTTY_CLIENT_H__
+#define __MUTTY_CLIENT_H__
 #include <bits/stdc++.h>
 #include "utils/Pointer.h"
 #include "utils/Timestamp.h"
@@ -18,9 +18,6 @@ namespace mutty {
 
 class Client {
 public:
-    Client(Looper *looper, InetAddress serverAddress)
-        : _looper(looper), _serverAddress(serverAddress) {}
-
     std::future<bool> start();
     void connect();
     // void disconnect();
@@ -30,24 +27,19 @@ public:
     void disableRetry() { _retry = false; }
     bool isRetryEnabled() { return _retry; }
 
-    // unsafe
-    void send(const void *data, int length) { 
-        _connection->send(data, length);
-    }
-
-    // for async
     void join() { while(!_hasEnabled || !_looper->isReadyToStop() || _looper->onStop()); }
 
-    // 提供给外部使用
     template <typename ...Args>
-    Transaction startTransaction(Args &&...args) {
-        return Transaction(_looper.get(), std::forward<Args>(args)...);
-    }
+    Transaction startTransaction(Args &&...args);
 
     TCP_POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy)
     TCP_POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy)
     TCP_POLICY_CALLBACK_DEFINE(onWriteComplete, _writeCompletePolicy)
     TCP_POLICY_CALLBACK_DEFINE(onClose, _closePolicy)
+
+    Client(Looper *looper, InetAddress serverAddress)
+        : _looper(looper),
+          _serverAddress(serverAddress) {}
 
 private:
     void connecting(Socket socket/*, InetAddress address*/);
@@ -64,16 +56,11 @@ private:
     bool _hasEnabled {false};
     std::promise<bool> _connectedPromise;
 
-// for TcpHandler
-
     std::unique_ptr<TcpPolicy> _connectPolicy;
     std::unique_ptr<TcpPolicy> _messagePolicy;
     std::unique_ptr<TcpPolicy> _writeCompletePolicy;
     std::unique_ptr<TcpPolicy> _closePolicy;
-
 };
-
-
 
 inline std::future<bool> Client::start() {
     auto scheduler = _looper->getScheduler();
@@ -82,7 +69,7 @@ inline std::future<bool> Client::start() {
     return _connectedPromise.get_future();
 }
 
-void Client::connect() {
+inline void Client::connect() {
     Socket socket;
     socket.setBlock(); // for connecting convenience
     int ret = socket.connect(_serverAddress);
@@ -103,9 +90,13 @@ void Client::connect() {
             if(isRetryEnabled()) retry();
         break;
         default:
-            // socket安全析构
         break;
     }
+}
+
+template <typename ...Args>
+inline Transaction Client::startTransaction(Args &&...args) {
+    return Transaction(_looper.get(), std::forward<Args>(args)...);
 }
 
 inline void Client::connecting(Socket socket) {
@@ -121,9 +112,9 @@ inline void Client::connecting(Socket socket) {
 inline void Client::retry() {
     auto scheduler = _looper->getScheduler();
     scheduler->runAfter(_retryInterval).with([this] { connect(); });
-    // update 
+    // update
     constexpr static Millisecond MAX_RETRY = 10s;
-    Millisecond nextRetry = _retryInterval*2; 
+    Millisecond nextRetry = _retryInterval*2;
     _retryInterval = std::min(MAX_RETRY, nextRetry);
 }
 

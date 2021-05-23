@@ -1,5 +1,5 @@
-#ifndef __IO_EXCEPTION_H__
-#define __IO_EXCEPTION_H__
+#ifndef __MUTTY_IO_EXCEPTION_H__
+#define __MUTTY_IO_EXCEPTION_H__
 #include "ErrnoException.h"
 namespace mutty {
 

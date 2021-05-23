@@ -1,5 +1,5 @@
-#ifndef __LOOPER_H__
-#define __LOOPER_H__
+#ifndef __MUTTY_LOOPER_H__
+#define __MUTTY_LOOPER_H__
 #include <bits/stdc++.h>
 #include "utils/Callable.h"
 #include "utils/Pointer.h"
@@ -13,26 +13,10 @@ namespace mutty {
 
 class Looper {
 public:
-    void loop() {
-        Timer::ResultSet tasks;
-        for(MessageQueue provider; !_stop || onStop(); ) {
-            auto timeout = _scheduler.run(tasks);
-            for(auto &&task : tasks) task();
-            _poller.poll(std::max(timeout, 1ms)); // TODO Config
-            /* synchronized(_provider) */ {
-                std::lock_guard<std::mutex> _ {_provider.lock()};
-                provider = std::move(_provider); // move并不移动原有的锁
-            }
-            while(provider.hasNext()) {
-                consume(provider.next());
-            }
-        }
-    }
-
-
+    void loop();
 
     void stop() { _stop = true; }
-    bool onStop() { return _provider.hasNextUnlock(); } // override
+    bool onStop() { return _provider.hasNextUnlock(); }
     bool isReadyToStop() { return _stop; }
 
     Pointer<MessageQueue> getProvider() { return &_provider; }
@@ -40,17 +24,31 @@ public:
     Pointer<Timer> getScheduler() { return &_scheduler; }
     
 private:
-    // In Loop Thread
     void consume(Message msg) 
         { msg.target->handle(msg); }
 
 private:
     bool _stop = false;
-    std::thread::id _threadId = std::this_thread::get_id();
-    MessageQueue _provider; // provider不会区分不同类型的消息，总是对应于同一个Looper
+    MessageQueue _provider;
     Multiplexer _poller;
     Timer _scheduler;
 };
+
+inline void Looper::loop() {
+    Timer::ResultSet tasks;
+    for(MessageQueue provider; !_stop || onStop(); ) {
+        auto timeout = _scheduler.run(tasks);
+        for(auto &&task : tasks) task();
+        _poller.poll(std::max(timeout, 1ms));
+        /* synchronized(_provider) */ {
+            std::lock_guard<std::mutex> _ {_provider.lock()};
+            provider = std::move(_provider);
+        }
+        while(provider.hasNext()) {
+            consume(provider.next());
+        }
+    }
+}
 
 } // mutty
 #endif

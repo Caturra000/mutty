@@ -1,5 +1,5 @@
-#ifndef __TIMER_EVENT_H__
-#define __TIMER_EVENT_H__
+#ifndef __MUTTY_TIMER_EVENT_H__
+#define __MUTTY_TIMER_EVENT_H__
 #include <bits/stdc++.h>
 #include "utils/Callable.h"
 #include "utils/Timestamp.h"

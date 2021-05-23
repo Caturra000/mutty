@@ -1,5 +1,5 @@
-#ifndef __HANDLER_H__
-#define __HANDLER_H__
+#ifndef __MUTTY_HANDLER_H__
+#define __MUTTY_HANDLER_H__
 #include <bits/stdc++.h>
 #include "utils/Callable.h"
 #include "utils/TypeTraits.h"
@@ -27,7 +27,6 @@ namespace mutty {
 
 class Handler {
 public:
-    // 处理消息的业务逻辑接口
     virtual void handle(Message msg) = 0;
     virtual ~Handler() { }
 };

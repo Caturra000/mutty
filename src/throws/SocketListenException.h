@@ -1,5 +1,5 @@
-#ifndef __SOCKET_LISTEN_EXCEPTION_H__
-#define __SOCKET_LISTEN_EXCEPTION_H__
+#ifndef __MUTTY_SOCKET_LISTEN_EXCEPTION_H__
+#define __MUTTY_SOCKET_LISTEN_EXCEPTION_H__
 #include "SocketException.h"
 namespace mutty {
 

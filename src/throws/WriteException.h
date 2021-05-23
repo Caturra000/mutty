@@ -1,5 +1,5 @@
-#ifndef __WRITE_EXCEPTION_H__
-#define __WRITE_EXCEPTION_H__
+#ifndef __MUTTY_WRITE_EXCEPTION_H__
+#define __MUTTY_WRITE_EXCEPTION_H__
 #include "IoException.h"
 namespace mutty {
 

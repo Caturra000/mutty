@@ -1,5 +1,5 @@
-#ifndef __EPOLL_CREATE_EXCEPTION_H__
-#define __EPOLL_CREATE_EXCEPTION_H__
+#ifndef __MUTTY_EPOLL_CREATE_EXCEPTION_H__
+#define __MUTTY_EPOLL_CREATE_EXCEPTION_H__
 #include "EpollException.h"
 namespace mutty {
 
