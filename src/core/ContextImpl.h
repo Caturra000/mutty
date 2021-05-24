@@ -13,6 +13,14 @@ namespace mutty {
 
 class ContextImpl: public Context {
 public:
+    template <typename ...Args>
+    void async(Args &&...args);
+
+    uint32_t events() const override { return _events; }
+    bool readEnabled() override { return _events & EVENT_READ; }
+    bool writeEnabled() override { return _events & EVENT_WRITE; }
+
+protected:
     void sendMessage(int what) { _messageQueue->post({_handler.get(), what}); } 
     void sendMessage(int what, int uFlag) { _messageQueue->post({_handler.get(), what, uFlag}); }
     void sendMessageWithData(int what, void *data);
@@ -23,18 +31,12 @@ public:
     void sendErrorMessage() override { sendMessage(MSG_POLL_ERROR); }
     void sendCloseMessage() override { sendMessage(MSG_POLL_CLOSE); }
 
-    template <typename ...Args>
-    void async(Args &&...args);
-
-    uint32_t events() const override { return _events; }
     void updateState() override;
 
     void enableRead() override;
     void enableWrite() override;
     void disableRead() override;
     void disableWrite() override;
-    bool readEnabled() override { return _events & EVENT_READ; }
-    bool writeEnabled() override { return _events & EVENT_WRITE; }
 
     ContextImpl(Handler *handler = nullptr, Looper *looper = nullptr);
 
@@ -60,6 +62,12 @@ protected:
     constexpr static uint32_t EVENT_WRITE = POLL_OUT;
 };
 
+template <typename ...Args>
+inline void ContextImpl::async(Args &&...args) {
+    _looper->getScheduler()->runAt(now())
+        .with(Callable::make(std::forward<Args>(args)...));
+}
+
 inline void ContextImpl::sendMessageWithData(int what, void *data) { 
     _messageQueue->post( Message {
         .target = _handler.get(),
@@ -70,12 +78,6 @@ inline void ContextImpl::sendMessageWithData(int what, void *data) {
 
 inline void ContextImpl::sendMessageWithBinaryData(int what, int size, void *data) {
     _messageQueue->post({_handler.get(), what, size, data});
-}
-
-template <typename ...Args>
-inline void ContextImpl::async(Args &&...args) {
-    _looper->getScheduler()->runAt(now())
-        .with(Callable::make(std::forward<Args>(args)...));
 }
 
 inline void ContextImpl::updateState() {
