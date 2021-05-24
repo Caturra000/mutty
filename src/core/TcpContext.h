@@ -99,13 +99,7 @@ inline void TcpContext::send(const void *data, int length) {
 
 inline void TcpContext::start() {
     std::weak_ptr<TcpContext> _this = shared_from_this();
-    async([_this] {
-        if(auto context = _this.lock()) {
-            context->setConnected();
-            context->enableRead();
-            context->_handler._connectionCallback(); // FIXME: hard code, move to handler
-        }
-    });
+    sendMessage(TcpHandler::MSG_TCP_START);
 }
 
 inline Callable TcpContext::binder(std::function<void(TcpContext*)> functor) {

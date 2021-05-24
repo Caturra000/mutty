@@ -47,5 +47,13 @@ inline void TcpHandler::handleClose() {
     }
 }
 
+inline void TcpHandler::handleStart() {
+    if(_context->isConnecting()) {
+        _context->setConnected();
+        _context->enableRead();
+        _connectionCallback();
+    }
+}
+
 } // mutty
 #endif

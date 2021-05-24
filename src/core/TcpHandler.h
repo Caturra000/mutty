@@ -12,20 +12,27 @@ namespace mutty {
 class TcpContext;
 class TcpHandler: public Handler {
 public:
-    void handle(Message msg) override;
+    constexpr static int MSG_TCP_START = 21;
 
-    void handleRead();
-    void handleWrite();
-    void handleError();
-    void handleClose();
+    void handle(Message msg) override;
 
     TcpHandler(TcpContext *context): _context(context) {};
 
-    Pointer<TcpContext> _context;
+public:
     Callable _connectionCallback;
     Callable _messageCallback;
     Callable _writeCompleteCallback;
     Callable _closeCallback;
+
+private:
+    void handleRead();
+    void handleWrite();
+    void handleError();
+    void handleClose();
+    void handleStart();
+
+private:
+    Pointer<TcpContext> _context;
 };
 
 inline void TcpHandler::handle(Message msg) {
@@ -41,6 +48,9 @@ inline void TcpHandler::handle(Message msg) {
         break;
         case ContextImpl::MSG_POLL_CLOSE:
             handleClose();
+        break;
+        case MSG_TCP_START:
+            handleStart();
         break;
         default:
         ;

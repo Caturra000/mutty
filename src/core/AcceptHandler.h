@@ -15,12 +15,17 @@ public:
     constexpr static int MSG_ACCEPT_WITH_DATA  = 11;
 
     void handle(Message msg) override;
-    void handleRead(int who = 0);
 
     AcceptHandler(AcceptContext* context): _context(context) {}
 
-    Pointer<AcceptContext> _context;
+public:
     Callable _newConnectionCallback;
+
+private:
+    void handleRead(int who = 0);
+
+private:
+    Pointer<AcceptContext> _context;
 };
 
 inline void AcceptHandler::handle(Message msg) {
