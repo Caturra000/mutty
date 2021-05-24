@@ -61,18 +61,19 @@ private:
     bool _running {false};
     std::mutex _mutex;
     ResultSet _reenterables;
+    long _counter {0}; 
 };
 
 inline Timer::Timer(std::initializer_list<TimerEvent> eventList): Timer() {
     for(auto &e : eventList) {
-        _container.push(std::move(const_cast<TimerEvent&>(e)));
+        _container.emplace(std::move(const_cast<TimerEvent&>(e)));
     }
 }
 
 template <typename ...EventConstructorArgs>
 inline Timer& Timer::append(EventConstructorArgs &&...args) {
     std::lock_guard<std::mutex> _{_mutex};
-    _container.push(TimerEvent(std::forward<EventConstructorArgs>(args)...));
+    _container.emplace(std::forward<EventConstructorArgs>(args)..., ++_counter);
     return *this;
 }
 
@@ -86,12 +87,12 @@ inline Millisecond Timer::run() {
         Defer _ {[this] { _container.pop(); }};
         if(e._atMost > 0) e._what.call();
         if(e._atMost > 1) {
-            _reenterables.push_back(std::move(const_cast<TimerEvent&>(e)));
+            _reenterables.emplace_back(std::move(const_cast<TimerEvent&>(e)));
             auto &b = _reenterables.back();
             b.next();
         }
     }
-    for(auto &e : _reenterables) _container.push(std::move(e));
+    for(auto &e : _reenterables) _container.emplace(std::move(e));
     _reenterables.clear();
     if(_container.empty()) return Millisecond::zero();
     return std::chrono::duration_cast<Millisecond>(_container.top()._when - now());
@@ -126,8 +127,8 @@ inline Millisecond Timer::run(ResultSet &tasks) {
 
 template <typename ...Args>
 inline Timer::TimerHelper& Timer::TimerHelper::with(Args &&...args) { 
-    _thisTimer->append(_when, 
-        Callable::make(std::forward<Args>(args)...), 
+    _thisTimer->append(_when,
+        Callable::make(std::forward<Args>(args)...),
         _interval, _atMost); 
     return *this;
 }

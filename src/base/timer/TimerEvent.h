@@ -13,8 +13,10 @@ struct TimerEvent {
     uint64_t _ticket;
     Callable _what;
 
-    TimerEvent(Timestamp when, Callable what, Nanosecond interval = Millisecond::zero(), uint64_t atMost = 1)
-        : _when(when), _what(std::move(what)), _interval(interval), _atMost(atMost) { }
+    TimerEvent(Timestamp when, Callable what, Nanosecond interval = Millisecond::zero(),
+               uint64_t atMost = 1, uint64_t ticket = -1)
+        : _when(when), _what(std::move(what)), _interval(interval),
+          _atMost(atMost), _ticket(ticket) {}
 
     bool operator > (const TimerEvent &rhs) const {
         if(_when != rhs._when) return _when > rhs._when;
@@ -26,7 +28,7 @@ struct TimerEvent {
     void next() {
         _when += _interval;
         _atMost--;
-        if(!(_atMost & 7)) _ticket = random<uint64_t>();
+        // if(!(_atMost & 7)) _ticket = random<uint64_t>();
     }
 };
 
