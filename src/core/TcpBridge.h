@@ -33,10 +33,13 @@ inline void TcpHandler::handleError() {
 
 inline void TcpHandler::handleClose() {
     if(_context->isConnected() || _context->isDisConnecting()) {
+        // try to shutdown if force close
+        _context->shutdown();
+        // shouble be DISCONNECTING
         _context->disableRead();
         _context->disableWrite();
-        _context->setDisConnecting();
         auto context = _context.get();
+        // the last message of context
         _context->async([this, context] {
             context->setDisConnected();
             _closeCallback();
