@@ -41,7 +41,7 @@ public:
 
     int fd() const override { return acceptedSocket.fd(); }
 
-    void init();
+    void start();
 
     Callable binder(std::function<void(TcpContext*)> functor);
 
@@ -97,7 +97,7 @@ inline void TcpContext::send(const void *data, int length) {
     }
 }
 
-inline void TcpContext::init() {
+inline void TcpContext::start() {
     std::weak_ptr<TcpContext> _this = shared_from_this();
     async([_this] {
         if(auto context = _this.lock()) {

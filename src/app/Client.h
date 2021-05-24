@@ -104,7 +104,7 @@ inline void Client::connecting(Socket socket) {
     _connection = std::make_shared<TcpContext>(
         _looper.get(), std::move(socket), InetAddress{/*NONE*/}, _serverAddress);
     tcpCallbackInit(_connection.get()); // FIXME EINPROGRESS EINTR
-    _connection->init();
+    _connection->start();
     _hasEnabled = true;
     _connectedPromise.set_value(true);
 }

@@ -49,9 +49,9 @@ inline void Server::start() {
         auto connection = _connections.createNewConnection(
             std::move(connectionSocket), context->localAddress, peerAddress);
         tcpCallbackInit(connection.get());
-        connection->init();
+        connection->start();
     });
-    _acceptor->init();
+    _acceptor->start();
 }
 
 inline void Server::tcpCallbackInit(TcpContext *connection) {

@@ -14,7 +14,7 @@ class AcceptContext: public ContextImpl, public std::enable_shared_from_this<Acc
 public:
     int fd() const override { return acceptSocket.fd(); }
 
-    void init();
+    void start();
 
     HANDLER_CALLBACK_DEFINE(onNewConnection, _handler._newConnectionCallback, AcceptContext, this)
 
@@ -29,7 +29,7 @@ private:
     AcceptHandler _handler;
 };
 
-inline void AcceptContext::init() {
+inline void AcceptContext::start() {
     acceptSocket.listen();
     enableRead();
 }
