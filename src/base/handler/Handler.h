@@ -6,7 +6,7 @@
 #include "Message.h"
 namespace mutty {
 
-#define HANDLER_CALLBACK_DEFINE(functionName, callbackMember, ContextType, contextMember) \
+#define HANDLER_CALLBACK_DEFINE(functionName, callbackMember, ContextType, contextPointer) \
     /* non-context */ \
     template <typename ...Args, typename = IsCallableType<Args...>> \
     void functionName(Args &&...args) { \
@@ -16,19 +16,19 @@ namespace mutty {
     template <typename Lambda, typename = IsCallableType<Lambda, ContextType*>> \
     void functionName(Lambda &&callback) { \
         callbackMember = Callable::make( \
-            std::forward<Lambda>(callback), contextMember.get()); \
+            std::forward<Lambda>(callback), contextPointer); \
     } \
     /* safe for lifecycle */ \
     template <typename Lambda, typename U = IsCallableType<Lambda, std::weak_ptr<ContextType>>> \
     void functionName(Lambda &&callback, U* = nullptr) { \
         callbackMember = Callable::make( \
-            std::forward<Lambda>(callback), contextMember); \
+            std::forward<Lambda>(callback), std::weak_ptr<ContextType>(shared_from_this())); \
     }
 
 class Handler {
 public:
     virtual void handle(Message msg) = 0;
-    virtual ~Handler() { }
+    virtual ~Handler() {}
 };
 
 } // mutty

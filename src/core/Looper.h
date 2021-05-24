@@ -24,8 +24,7 @@ public:
     Pointer<Timer> getScheduler() { return &_scheduler; }
     
 private:
-    void consume(Message msg) 
-        { msg.target->handle(msg); }
+    void consume(Message msg) { msg.target->handle(msg); }
 
 private:
     bool _stop = false;

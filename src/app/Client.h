@@ -9,7 +9,7 @@
 #include "core/AsyncLooperContainer.h"
 #include "core/Looper.h"
 #include "core/ConnectionPool.h"
-#include "core/TcpHandler.h"
+#include "core/TcpBridge.h"
 #include "core/TcpPolicy.h"
 #include "core/Transaction.h"
 #include "net/InetAddress.h"
@@ -44,11 +44,11 @@ public:
 private:
     void connecting(Socket socket/*, InetAddress address*/);
     void retry();
-    void tcpCallbackInit(TcpHandler *connection);
+    void tcpCallbackInit(TcpContext *connection);
 
 private:
     Pointer<Looper> _looper;
-    std::unique_ptr<TcpHandler> _connection;
+    std::shared_ptr<TcpContext> _connection;
 
     InetAddress _serverAddress;
     Millisecond _retryInterval {50ms};
@@ -101,7 +101,7 @@ inline Transaction Client::startTransaction(Args &&...args) {
 
 inline void Client::connecting(Socket socket) {
     socket.setNonBlock();
-    _connection = cpp11::make_unique<TcpHandler>(
+    _connection = std::make_shared<TcpContext>(
         _looper.get(), std::move(socket), InetAddress{/*NONE*/}, _serverAddress);
     tcpCallbackInit(_connection.get()); // FIXME EINPROGRESS EINTR
     _connection->init();
@@ -118,7 +118,7 @@ inline void Client::retry() {
     _retryInterval = std::min(MAX_RETRY, nextRetry);
 }
 
-inline void Client::tcpCallbackInit(TcpHandler *connection) {
+inline void Client::tcpCallbackInit(TcpContext *connection) {
     if(_connectPolicy) _connectPolicy->onConnect(connection);
     if(_messagePolicy) _messagePolicy->onMessage(connection);
     if(_writeCompletePolicy) _writeCompletePolicy->onWriteComplete(connection);

@@ -11,20 +11,25 @@
 #include "net/Socket.h"
 #include "net/InetAddress.h"
 #include "ContextImpl.h"
+#include "TcpHandler.h"
 namespace mutty {
 
-class TcpHandler;
+
 class TcpContext: public ContextImpl, public std::enable_shared_from_this<TcpContext> {
 public:
     bool isConnecting() { return networkStatus == CONNECTING; }
     bool isConnected() { return networkStatus == CONNECTED; }
     bool isDisConnecting() { return networkStatus == DISCONNECTING; }
     bool isDisConnected() { return networkStatus == DISCONNECTED; }
+
+    // TODO private
+
     void setConnecting() { networkStatus = CONNECTING; }
     void setConnected() { networkStatus = CONNECTED; }
     void setDisConnecting() { networkStatus = DISCONNECTING; }
     void setDisConnected() { networkStatus = DISCONNECTED; }
 
+    // TODO
     void shutdown(/*bool force = false*/);
     void forceClose();
     void forceClose(Nanosecond delay);
@@ -36,14 +41,22 @@ public:
 
     int fd() const override { return acceptedSocket.fd(); }
 
+    void init();
+
     Callable binder(std::function<void(TcpContext*)> functor);
 
-    TcpContext(Handler *handler, Looper *looper, 
-               Socket acceptedSocket, InetAddress localAddress,
-               InetAddress peerAddress);
+    HANDLER_CALLBACK_DEFINE(onConnect,       _handler._connectionCallback,    TcpContext, this)
+    HANDLER_CALLBACK_DEFINE(onMessage,       _handler._messageCallback,       TcpContext, this)
+    HANDLER_CALLBACK_DEFINE(onWriteComplete, _handler._writeCompleteCallback, TcpContext, this)
+    HANDLER_CALLBACK_DEFINE(onClose,         _handler._closeCallback,         TcpContext, this)
+
+    TcpContext(Looper *looper, Socket acceptedSocket,
+               InetAddress localAddress, InetAddress peerAddress);
 
     enum NetworkStatus { CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED };
     NetworkStatus networkStatus { CONNECTING };
+
+    TcpHandler _handler;
 
     Socket acceptedSocket;
     InetAddress localAddress, peerAddress;
@@ -83,13 +96,25 @@ inline void TcpContext::send(const void *data, int length) {
     }
 }
 
+inline void TcpContext::init() {
+    std::weak_ptr<TcpContext> _this = shared_from_this();
+    async([_this] {
+        if(auto context = _this.lock()) {
+            context->setConnected();
+            context->enableRead();
+            context->_handler._connectionCallback(); // FIXME: hard code, move to handler
+        }
+    });
+}
+
 inline Callable TcpContext::binder(std::function<void(TcpContext*)> functor) {
     return Callable::make(std::move(functor), this);
 }
 
-inline TcpContext::TcpContext(Handler *handler, Looper *looper, 
-        Socket acceptedSocket, InetAddress localAddress, InetAddress peerAddress)
-    : ContextImpl(handler, looper),
+inline TcpContext::TcpContext(Looper *looper, Socket acceptedSocket,
+        InetAddress localAddress, InetAddress peerAddress)
+    : ContextImpl(&_handler, looper),
+      _handler(this),
       acceptedSocket(std::move(acceptedSocket)),
       localAddress(localAddress),
       peerAddress(peerAddress),

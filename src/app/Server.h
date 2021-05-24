@@ -8,9 +8,9 @@
 #include "utils/Compat.h"
 #include "utils/FastIo.h"
 #include "core/Looper.h"
-#include "core/AcceptHandler.h"
+#include "core/AcceptBridge.h"
 #include "core/ConnectionPool.h"
-#include "core/TcpHandler.h"
+#include "core/TcpBridge.h"
 #include "core/TcpPolicy.h"
 namespace mutty {
 
@@ -25,9 +25,9 @@ public:
 
     Server(Looper *looper, InetAddress localAddress)
         : _looper(looper),
-          _acceptor(looper, localAddress) {}
+          _acceptor(std::make_shared<AcceptContext>(looper, localAddress)) {}
 private:
-    void tcpCallbackInit(TcpHandler*);
+    void tcpCallbackInit(TcpContext*);
 
     std::unique_ptr<TcpPolicy> _connectPolicy;
     std::unique_ptr<TcpPolicy> _messagePolicy;
@@ -35,27 +35,26 @@ private:
     std::unique_ptr<TcpPolicy> _closePolicy;
 
     Pointer<Looper> _looper;
-    AcceptHandler _acceptor;
+    std::shared_ptr<AcceptContext> _acceptor;
     ConnectionPool _connections; 
 };
 
 inline void Server::start() {
-    _acceptor.onNewConnection([this](std::weak_ptr<AcceptContext> context) {
-        if(auto ctx = context.lock()) {
-            auto connectionInfo = std::move(cast<
-                std::pair<Socket, InetAddress>&>(ctx->exchanger));
-            Socket &connectionSocket = connectionInfo.first;
-            InetAddress &peerAddress = connectionInfo.second;
-            auto &connection = _connections.createNewConnection(
-                std::move(connectionSocket), ctx->localAddress, peerAddress);
-            tcpCallbackInit(connection.get());
-            connection->init();
-        }
+    _acceptor->onNewConnection([this](AcceptContext *context) {
+        // TODO poll
+        auto connectionInfo = std::move(cast<
+            std::pair<Socket, InetAddress>&>(context->exchanger));
+        Socket &connectionSocket = connectionInfo.first;
+        InetAddress &peerAddress = connectionInfo.second;
+        auto connection = _connections.createNewConnection(
+            std::move(connectionSocket), context->localAddress, peerAddress);
+        tcpCallbackInit(connection.get());
+        connection->init();
     });
-    _acceptor.init();
+    _acceptor->init();
 }
 
-inline void Server::tcpCallbackInit(TcpHandler *connection) {
+inline void Server::tcpCallbackInit(TcpContext *connection) {
     if(_connectPolicy) _connectPolicy->onConnect(connection);
     if(_messagePolicy) _messagePolicy->onMessage(connection);
     if(_writeCompletePolicy) _writeCompletePolicy->onWriteComplete(connection);
