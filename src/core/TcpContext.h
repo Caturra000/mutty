@@ -56,13 +56,14 @@ public:
     enum NetworkStatus { CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED };
     NetworkStatus networkStatus { CONNECTING };
 
-    TcpHandler _handler;
-
     Socket acceptedSocket;
     InetAddress localAddress, peerAddress;
     CachedBuffer inputBuffer, outputBuffer;
 
     Pointer<Timer> scheduler;
+
+private:
+    TcpHandler _handler;
 };
 
 inline void TcpContext::shutdown(/*bool force = false*/) {

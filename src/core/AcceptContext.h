@@ -34,7 +34,6 @@ inline void AcceptContext::init() {
     enableRead();
 }
 
-
 inline AcceptContext::AcceptContext(Looper *looper, InetAddress localAddress)
     : ContextImpl(&_handler, looper),
       localAddress(localAddress),
@@ -43,8 +42,6 @@ inline AcceptContext::AcceptContext(Looper *looper, InetAddress localAddress)
     acceptSocket.config(Option::REUSE_PORT | Option::REUSE_ADDR);
     acceptSocket.bind(localAddress);
 }
-
-
 
 } // mutty
 #endif

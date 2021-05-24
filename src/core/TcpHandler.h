@@ -19,9 +19,6 @@ public:
     void handleError();
     void handleClose();
 
-    // void init();
-
-
     TcpHandler(TcpContext *context): _context(context) {};
 
     Pointer<TcpContext> _context;
@@ -49,8 +46,6 @@ inline void TcpHandler::handle(Message msg) {
         ;
     }
 }
-
-
 
 } // mutty
 
