@@ -91,7 +91,7 @@ inline void TcpContext::forceClose(Nanosecond delay) {
 }
 
 inline void TcpContext::send(const void *data, int length) {
-    if(!isDisConnected()) {
+    if(!isDisConnecting() || !isDisConnected()) {
         outputBuffer.append(static_cast<const char *>(data), length);
         if(!(_events & EVENT_WRITE)) enableWrite();
     }

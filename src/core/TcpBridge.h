@@ -35,8 +35,12 @@ inline void TcpHandler::handleClose() {
     if(_context->isConnected() || _context->isDisConnecting()) {
         _context->disableRead();
         _context->disableWrite();
-        _context->setDisConnected();
-        _closeCallback();
+        _context->setDisConnecting();
+        auto context = _context.get();
+        _context->async([this, context] {
+            context->setDisConnected();
+            _closeCallback();
+        });
     }
 }
 
