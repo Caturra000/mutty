@@ -1,9 +1,10 @@
 #ifndef __MUTTY_CONTEXT_H__
 #define __MUTTY_CONTEXT_H__
 #include <bits/stdc++.h>
+#include "utils/NonCopyable.h"
 namespace mutty {
 
-class Context {
+class Context: private NonCopyable {
 public:
     constexpr static int MSG_POLL_READ  = 1;
     constexpr static int MSG_POLL_WRITE = 2;

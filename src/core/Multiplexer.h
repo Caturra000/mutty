@@ -5,11 +5,12 @@
 #include <poll.h>
 #include <unistd.h>
 #include "utils/Timestamp.h"
+#include "utils/NonCopyable.h"
 #include "base/context/Context.h"
 #include "throws/Exceptions.h"
 namespace mutty {
 
-class Multiplexer {
+class Multiplexer: private NonCopyable {
 public:
     void poll(Nanosecond timeout);
     void update(int operation, Context *ctx);

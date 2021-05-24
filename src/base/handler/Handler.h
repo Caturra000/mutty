@@ -3,6 +3,7 @@
 #include <bits/stdc++.h>
 #include "utils/Callable.h"
 #include "utils/TypeTraits.h"
+#include "utils/NonCopyable.h"
 #include "Message.h"
 namespace mutty {
 
@@ -25,7 +26,7 @@ namespace mutty {
             std::forward<Lambda>(callback), std::weak_ptr<ContextType>(shared_from_this())); \
     }
 
-class Handler {
+class Handler: private NonCopyable {
 public:
     virtual void handle(Message msg) = 0;
     virtual ~Handler() {}

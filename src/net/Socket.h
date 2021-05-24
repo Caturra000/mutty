@@ -7,12 +7,12 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <bits/stdc++.h>
-#include "utils/Noncopyable.h"
+#include "utils/NonCopyable.h"
 #include "throws/Exceptions.h"
 #include "InetAddress.h"
 namespace mutty {
 
-class Socket: public Noncopyable {
+class Socket: private NonCopyable {
 public:
     int fd() const { return _socketFd; }
 

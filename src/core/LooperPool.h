@@ -4,11 +4,12 @@
 #include "utils/Algorithms.h"
 #include "utils/ThreadPool.h"
 #include "utils/Compat.h"
+#include "utils/NonCopyable.h"
 #include "Looper.h"
 namespace mutty {
 
 template <size_t N>
-class LooperPool {
+class LooperPool: private NonCopyable {
 public:
     std::unique_ptr<Looper>& pick() { return _pool[random<size_t>() & N-1]; }
 

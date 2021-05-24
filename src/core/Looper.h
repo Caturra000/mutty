@@ -4,6 +4,7 @@
 #include "utils/Callable.h"
 #include "utils/Pointer.h"
 #include "utils/Timestamp.h"
+#include "utils/NonCopyable.h"
 #include "base/handler/Handler.h"
 #include "base/handler/Message.h"
 #include "base/handler/MessageQueue.h"
@@ -11,7 +12,7 @@
 #include "Multiplexer.h"
 namespace mutty {
 
-class Looper {
+class Looper: private NonCopyable {
 public:
     void loop();
 

@@ -1,10 +1,11 @@
 #ifndef __MUTTY_MESSAGE_QUEUE_H__
 #define __MUTTY_MESSAGE_QUEUE_H__
 #include <bits/stdc++.h>
+#include "utils/NonCopyable.h"
 #include "Message.h"
 namespace mutty {
 
-class MessageQueue {
+class MessageQueue: private NonCopyable {
 public:
     int size() const { return _queue.size(); }
     bool hasNext() const { return !_queue.empty(); }

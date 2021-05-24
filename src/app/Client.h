@@ -6,6 +6,7 @@
 #include "utils/Callable.h"
 #include "utils/Compat.h"
 #include "utils/FastIo.h"
+#include "utils/NonCopyable.h"
 #include "core/AsyncLooperContainer.h"
 #include "core/Looper.h"
 #include "core/ConnectionPool.h"
@@ -16,7 +17,7 @@
 #include "net/Socket.h"
 namespace mutty {
 
-class Client {
+class Client: private NonCopyable {
 public:
     std::future<bool> start();
     void connect();

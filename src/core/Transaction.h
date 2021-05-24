@@ -1,10 +1,11 @@
 #ifndef __MUTTY_TRANSACTION_H__
 #define __MUTTY_TRANSACTION_H__
 #include <bits/stdc++.h>
+#include "utils/NonCopyable.h"
 #include "Looper.h"
 namespace mutty {
 
-class Transaction {
+class Transaction: private NonCopyable {
 public:
     template <typename ...Args>
     Transaction(Looper *looper, Args &&...args);

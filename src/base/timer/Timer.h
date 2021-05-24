@@ -5,10 +5,11 @@
 #include "utils/Defer.h"
 #include "utils/Algorithms.h"
 #include "utils/Pointer.h"
+#include "utils/NonCopyable.h"
 #include "TimerEvent.h"
 namespace mutty {
 
-class Timer {
+class Timer: private NonCopyable {
 public:
     using EventHeap = std::priority_queue<
             TimerEvent, std::vector<TimerEvent>, std::greater<TimerEvent>>;

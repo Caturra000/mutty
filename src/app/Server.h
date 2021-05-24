@@ -7,6 +7,7 @@
 #include "utils/TypeTraits.h"
 #include "utils/Compat.h"
 #include "utils/FastIo.h"
+#include "utils/NonCopyable.h"
 #include "core/Looper.h"
 #include "core/AcceptBridge.h"
 #include "core/ConnectionPool.h"
@@ -14,7 +15,7 @@
 #include "core/TcpPolicy.h"
 namespace mutty {
 
-class Server {
+class Server: private NonCopyable {
 public:
     void start();
 

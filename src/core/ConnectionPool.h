@@ -3,12 +3,15 @@
 #include <bits/stdc++.h>
 #include "utils/Compat.h"
 #include "utils/WeakReference.h"
+#include "utils/NonCopyable.h"
 #include "TcpBridge.h"
 #include "LooperPool.h"
 namespace mutty {
 
 template <size_t N>
-class ConnectionPoolBase: private WeakReference<ConnectionPoolBase<N>> {
+class ConnectionPoolBase
+    : private WeakReference<ConnectionPoolBase<N>>,
+      private NonCopyable {
 public:
 
     std::shared_ptr<TcpContext> createNewConnection(Socket acceptedsocket,
