@@ -9,7 +9,6 @@
 #include "AcceptHandler.h"
 namespace mutty {
 
-class Handler;
 class AcceptContext: public ContextImpl, public std::enable_shared_from_this<AcceptContext> {
 public:
     int fd() const override { return acceptSocket.fd(); }

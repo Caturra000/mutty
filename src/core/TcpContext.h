@@ -22,14 +22,6 @@ public:
     bool isDisConnecting() { return networkStatus == DISCONNECTING; }
     bool isDisConnected() { return networkStatus == DISCONNECTED; }
 
-    // TODO private
-
-    void setConnecting() { networkStatus = CONNECTING; }
-    void setConnected() { networkStatus = CONNECTED; }
-    void setDisConnecting() { networkStatus = DISCONNECTING; }
-    void setDisConnected() { networkStatus = DISCONNECTED; }
-
-    // TODO
     void shutdown(/*bool force = false*/);
     void forceClose();
     void forceClose(Nanosecond delay);
@@ -53,17 +45,25 @@ public:
     TcpContext(Looper *looper, Socket acceptedSocket,
                InetAddress localAddress, InetAddress peerAddress);
 
+public:
     enum NetworkStatus { CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED };
-    NetworkStatus networkStatus { CONNECTING };
 
     Socket acceptedSocket;
     InetAddress localAddress, peerAddress;
     CachedBuffer inputBuffer, outputBuffer;
-
     Pointer<Timer> scheduler;
 
 private:
+    void setConnecting() { networkStatus = CONNECTING; }
+    void setConnected() { networkStatus = CONNECTED; }
+    void setDisConnecting() { networkStatus = DISCONNECTING; }
+    void setDisConnected() { networkStatus = DISCONNECTED; }
+
+private:
     TcpHandler _handler;
+    NetworkStatus networkStatus { CONNECTING };
+
+    friend class TcpHandler;
 };
 
 inline void TcpContext::shutdown(/*bool force = false*/) {
