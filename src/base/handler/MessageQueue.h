@@ -32,7 +32,7 @@ inline Message MessageQueue::next() {
 
 inline void MessageQueue::post(Message msg) {
     std::lock_guard<std::mutex> _{_mutex};
-    _queue.push(msg); 
+    _queue.push(msg);
 }
 
 inline MessageQueue& MessageQueue::operator=(MessageQueue &&rhs) {

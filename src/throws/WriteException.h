@@ -7,7 +7,7 @@ class WriteException: public IoException {
 public:
     static constexpr const char *TAG = "write exception";
     using IoException::IoException;
-    WriteException(int err): IoException(TAG, err) { }
+    WriteException(int err): IoException(TAG, err) {}
 };
 
 } // mutty

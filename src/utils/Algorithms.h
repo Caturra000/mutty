@@ -12,7 +12,7 @@ auto roundToPowerOfTwo = [](int v)->int {
 
 auto lowbit = [](int v) { return v&-v; };
 auto isPowerOfTwo = [](int v) { return v == lowbit(v); };
-auto highestBitPosition = [](int v) { 
+auto highestBitPosition = [](int v) {
     for(int i = 31; ~i; --i) {
         if(v>>i&1) return i;
     }

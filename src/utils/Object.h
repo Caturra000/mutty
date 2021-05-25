@@ -6,10 +6,10 @@ namespace mutty {
 class Object final {
 public:
 
-    /*constexpr*/ Object(): _content(nullptr) { }
+    /*constexpr*/ Object(): _content(nullptr) {}
     template <typename ValueType, typename NonRef = typename std::remove_reference<ValueType>::type>
-    Object(ValueType &&value): _content(new Holder<NonRef>(std::forward<ValueType>(value))) { }
-    Object(const Object &rhs): _content(rhs._content ? rhs._content->clone() : nullptr) { }
+    Object(ValueType &&value): _content(new Holder<NonRef>(std::forward<ValueType>(value))) {}
+    Object(const Object &rhs): _content(rhs._content ? rhs._content->clone() : nullptr) {}
     Object(Object &&rhs): _content(rhs._content) { rhs._content = nullptr; }
     ~Object() { delete _content; }
 
@@ -38,15 +38,15 @@ public:
 private:
     class PlaceHolder {
     public:
-        virtual ~PlaceHolder() { } //
+        virtual ~PlaceHolder() {} //
         virtual PlaceHolder* clone() const = 0;
     };
 
     template <typename ValueType>
     class Holder: public PlaceHolder {
     public:
-        Holder(const ValueType &value): _held(value) { }
-        Holder(ValueType &&value): _held(static_cast<ValueType&&>(value)) { }
+        Holder(const ValueType &value): _held(value) {}
+        Holder(ValueType &&value): _held(static_cast<ValueType&&>(value)) {}
         PlaceHolder* clone() const override { return new Holder(_held); }
         ValueType _held;
 
@@ -66,7 +66,7 @@ inline void swap(Object &lhs, Object &rhs) {
 
 template <typename ValueType>
 inline ValueType* cast(Object *object) {
-    return object ? 
+    return object ?
         std::addressof(static_cast<Object::Holder<ValueType>*>(object->_content)->_held)
         : nullptr;
 }

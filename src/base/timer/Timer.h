@@ -47,11 +47,11 @@ public:
     // runAfter(2s).per(2s).atMost(3).with(func, arg0, arg1);
     // runEvery(500ms).at(now()+1s).with([]{std::cerr<<"b";});
 
-    TimerHelper runAt(Timestamp when) 
+    TimerHelper runAt(Timestamp when)
         { return TimerHelper{when, Millisecond::zero(), 1, this}; }
-    TimerHelper runAfter(Nanosecond interval) 
+    TimerHelper runAfter(Nanosecond interval)
         { return TimerHelper{nowAfter(interval), Millisecond::zero(), 1, this}; }
-    TimerHelper runEvery(Nanosecond interval) 
+    TimerHelper runEvery(Nanosecond interval)
         { return TimerHelper{now(), interval, std::numeric_limits<uint64_t>::max(), this}; }
 
 // Builder End
@@ -61,7 +61,7 @@ private:
     bool _running {false};
     std::mutex _mutex;
     ResultSet _reenterables;
-    long _counter {0}; 
+    long _counter {0};
 };
 
 inline Timer::Timer(std::initializer_list<TimerEvent> eventList): Timer() {
@@ -126,10 +126,10 @@ inline Millisecond Timer::run(ResultSet &tasks) {
 }
 
 template <typename ...Args>
-inline Timer::TimerHelper& Timer::TimerHelper::with(Args &&...args) { 
+inline Timer::TimerHelper& Timer::TimerHelper::with(Args &&...args) {
     _thisTimer->append(_when,
         Callable::make(std::forward<Args>(args)...),
-        _interval, _atMost); 
+        _interval, _atMost);
     return *this;
 }
 

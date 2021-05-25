@@ -7,7 +7,7 @@ class EpollControlException: public EpollException {
 public:
     static constexpr const char *TAG = "epoll control exception";
     using EpollException::EpollException;
-    EpollControlException(int err): EpollException(TAG, err) { }
+    EpollControlException(int err): EpollException(TAG, err) {}
 };
 
 } // mutty

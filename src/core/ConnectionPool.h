@@ -42,7 +42,7 @@ inline std::shared_ptr<TcpContext> ConnectionPoolBase<N>::createNewConnection(
     if(_container.size() > 128) GcBase::updateReusableIndex();
     auto connection = std::make_shared<TcpContext>(
             _looperPool.pick().get(),
-            std::move(acceptedsocket), localAddress, peerAddress); 
+            std::move(acceptedsocket), localAddress, peerAddress);
     if(reusable()) {
         int pos = GcBase::_reusableIndex++;
         _container[pos] = std::move(connection);

@@ -8,7 +8,7 @@ public:
     static constexpr const char *TAG = "socket create exception";
     using SocketException::SocketException;
     SocketCreateException(int err)
-        : SocketException(TAG, err) { }
+        : SocketException(TAG, err) {}
 };
 
 } // mutty

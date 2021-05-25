@@ -17,12 +17,12 @@ public:
     void operator()() const { _functor(); }
 
 public:
-    Callable() : _functor([]{}) { }
-    
+    Callable() : _functor([]{}) {}
+
 protected:
     using Functor = std::function<void()>;
-    Callable(const Functor &functor) : _functor(functor) { }
-    Callable(Functor &&functor): _functor(static_cast<Functor&&>(functor)) { }
+    Callable(const Functor &functor) : _functor(functor) {}
+    Callable(Functor &&functor): _functor(static_cast<Functor&&>(functor)) {}
     Functor _functor;
 };
 

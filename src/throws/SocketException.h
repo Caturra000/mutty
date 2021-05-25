@@ -7,7 +7,7 @@ class SocketException: public NetworkException {
 public:
     static constexpr const char *TAG = "socket exception";
     using NetworkException::NetworkException;
-    SocketException(int err): NetworkException(TAG, err) { }
+    SocketException(int err): NetworkException(TAG, err) {}
 };
 
 } // mutty

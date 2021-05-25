@@ -8,7 +8,7 @@ private:
     const char *_info;
 public:
     explicit MuttyException(const char *info)
-        : _info(info) { }
+        : _info(info) {}
     const char* what() const noexcept override
         { return _info; }
 };

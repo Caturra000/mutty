@@ -73,14 +73,14 @@ inline void Socket::bind(const InetAddress &address) {
         MUTTY_LOG_WARN("socket bind failed. fd =", _socketFd,
             "throws exception.", "errorno = ", errno);
         throw SocketBindException(errno);
-    } 
+    }
 }
 inline void Socket::listen(int backlog) {
     MUTTY_LOG_DEBUG("socket listening. fd =", _socketFd);
     if(::listen(_socketFd, backlog)) {
          MUTTY_LOG_WARN("socket listen failed. fd =", _socketFd,
             "throws exception.", "errorno = ", errno);
-        throw SocketListenException(errno); 
+        throw SocketListenException(errno);
     }
 }
 

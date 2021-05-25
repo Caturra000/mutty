@@ -21,7 +21,7 @@ public:
     bool writeEnabled() override { return _events & EVENT_WRITE; }
 
 protected:
-    void sendMessage(int what) { _messageQueue->post({_handler.get(), what}); } 
+    void sendMessage(int what) { _messageQueue->post({_handler.get(), what}); }
     void sendMessage(int what, int uFlag) { _messageQueue->post({_handler.get(), what, uFlag}); }
     void sendMessageWithData(int what, void *data);
     void sendMessageWithBinaryData(int what, int size, void *data);
@@ -68,12 +68,12 @@ inline void ContextImpl::async(Args &&...args) {
         .with(Callable::make(std::forward<Args>(args)...));
 }
 
-inline void ContextImpl::sendMessageWithData(int what, void *data) { 
+inline void ContextImpl::sendMessageWithData(int what, void *data) {
     _messageQueue->post( Message {
         .target = _handler.get(),
         .what = what,
         .any = data
-    });    
+    });
 }
 
 inline void ContextImpl::sendMessageWithBinaryData(int what, int size, void *data) {
@@ -97,14 +97,14 @@ inline void ContextImpl::updateState() {
 inline void ContextImpl::enableRead() {
     if(!(_events & EVENT_READ)) {
         _events |= EVENT_READ;
-        updateState(); 
+        updateState();
     }
 }
 
 inline void ContextImpl::enableWrite() {
     if(!(_events & EVENT_WRITE)) {
         _events |= EVENT_WRITE;
-        updateState(); 
+        updateState();
     }
 }
 

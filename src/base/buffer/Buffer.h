@@ -7,12 +7,10 @@
 #include "net/Socket.h"
 namespace mutty {
 
+// TODO int->ssize_t
 class Buffer {
 public:
-    Buffer(int size = 128)
-     : _capacity(size),
-       _buf(size),
-        _r(0), _w(0) {}
+    Buffer(int size = 128);
 
     int size() { return _capacity; }
     int unread() { return _w - _r; }
@@ -26,8 +24,8 @@ public:
     void expand() { _buf.resize(_capacity <<= 1); }
     void expandTo(int size) { _buf.resize(_capacity = size); }
 
-    void read(int n) { _r += n; }
-    void write(int n);
+    void hasRead(int n) { _r += n; }
+    void hasWritten(int n);
 
     char* readBuffer() { return _buf.data() + _r; }
     char* writeBuffer() { return _buf.data() + _w; }
@@ -49,6 +47,10 @@ private:
     int _r, _w; // _r <= _w
 };
 
+inline Buffer::Buffer(int size)
+    : _capacity(size),
+      _buf(size),
+      _r(0), _w(0) {}
 
 inline void Buffer::reuseIfPossible() {
     if(_r == _w) {
@@ -79,15 +81,15 @@ inline void Buffer::gc(int hint) {
     }
 }
 
-inline void Buffer::write(int n) {
-    _w += n; 
+inline void Buffer::hasWritten(int n) {
+    _w += n;
     reuseIfPossible();
 }
 
 inline void Buffer::append(const char *data, int size) {
     gc(size);
     memcpy(writeBuffer(), data, size);
-    write(size);
+    hasWritten(size);
 }
 
 inline int Buffer::readFrom(int fd) {
@@ -101,9 +103,9 @@ inline int Buffer::readFrom(int fd) {
     int n = ::readv(fd, vec, 2);
     if(n > 0) {
         if(n <= bufferLimit) {
-            write(n);
+            hasWritten(n);
         } else {
-            write(bufferLimit);
+            hasWritten(bufferLimit);
             int localSize = n - bufferLimit;
             append(localBuffer, localSize);
         }
@@ -114,7 +116,7 @@ inline int Buffer::readFrom(int fd) {
 
 inline int Buffer::writeTo(int fd) {
     int n = ::write(fd, readBuffer(), unread());
-    read(n);
+    hasRead(n);
     // n < 0 !EAGAIN throw
     return n;
 }

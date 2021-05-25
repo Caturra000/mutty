@@ -11,10 +11,10 @@ namespace mutty {
 // auto p2 = isCallable(g);
 // auto p3 = isCallable(g, 1);
 // auto p4 = isCallable([](std::string){}, "1");
-// 
+//
 // template <typename ...Args, typename = decltype(isCallable<Args...>)> void func();
 template<typename F, typename ...Args>
-inline constexpr auto isCallable(F &&f, Args &&...args) 
+inline constexpr auto isCallable(F &&f, Args &&...args)
         -> decltype(f(std::forward<Args>(args)...))* {
     return nullptr;
 }

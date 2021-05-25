@@ -7,7 +7,7 @@ class SocketBindException: public SocketException {
 public:
     static constexpr const char *TAG = "socket bind exception";
     using SocketException::SocketException;
-    SocketBindException(int err): SocketException(TAG, err) { }
+    SocketBindException(int err): SocketException(TAG, err) {}
 };
 
 } // mutty

@@ -90,7 +90,7 @@ inline void TcpContext::forceClose() {
 
 inline void TcpContext::forceClose(Nanosecond delay) {
     std::weak_ptr<TcpContext> _this = shared_from_this();
-    scheduler->runAfter(delay).with([_this] { 
+    scheduler->runAfter(delay).with([_this] {
         if(auto context = _this.lock()) {
             context->forceClose();
         }

@@ -7,7 +7,7 @@ class EpollCreateException: public EpollException {
 public:
     static constexpr const char *TAG = "epoll create exception";
     using EpollException::EpollException;
-    EpollCreateException(int err): EpollException(TAG, err) { }
+    EpollCreateException(int err): EpollException(TAG, err) {}
 };
 
 } // mutty

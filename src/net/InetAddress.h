@@ -30,7 +30,7 @@ inline InetAddress::InetAddress(const std::string &address) {
     auto pivot = split(address, ':');
     assert(pivot.size() == 2);
     _address = {
-        AF_INET, 
+        AF_INET,
         ::htons(toDec<uint16_t>(address.substr(pivot[1].first, pivot[1].second - pivot[1].first))),
         ::htonl(stringToIp(address.substr(pivot[0].first, pivot[0].second - pivot[0].first)))
     };
@@ -38,7 +38,7 @@ inline InetAddress::InetAddress(const std::string &address) {
 
 inline std::string InetAddress::ipToString() const {
     std::string s;
-    uint32_t addr = ::ntohl(_address.sin_addr.s_addr); 
+    uint32_t addr = ::ntohl(_address.sin_addr.s_addr);
     for(int chunk = 3; ~chunk; --chunk) {
         s.append(".", 3 > chunk).append(std::to_string((addr >> (chunk << 3)) & 0xff));
     }

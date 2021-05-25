@@ -38,7 +38,7 @@ private:
 
     Pointer<Looper> _looper;
     std::shared_ptr<AcceptContext> _acceptor;
-    ConnectionPool _connections; 
+    ConnectionPool _connections;
 };
 
 inline void Server::start() {

@@ -7,7 +7,7 @@ class ReadException: public IoException {
 public:
     static constexpr const char *TAG = "read exception";
     using IoException::IoException;
-    ReadException(int err): IoException(TAG, err) { }
+    ReadException(int err): IoException(TAG, err) {}
 };
 
 } // mutty

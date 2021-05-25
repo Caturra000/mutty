@@ -13,7 +13,7 @@ namespace mutty {
     template <typename Lambda> \
     void callback(Lambda &&functor) { \
         policy = cpp11::make_unique<TcpPolicyImpl<Lambda>>(std::forward<Lambda>(functor)); \
-    } 
+    }
 
 struct TcpPolicy {
     //virtual void setHandler(TcpHandler*) = 0;
@@ -36,7 +36,7 @@ struct TcpPolicyImpl: public TcpPolicy {
     void onWriteComplete(TcpContext *connection) override
         { connection->onWriteComplete(runtimeInfo); }
     void onClose(TcpContext *connection) override
-        { connection->onClose(runtimeInfo); } 
+        { connection->onClose(runtimeInfo); }
 };
 
 } // mutty

@@ -9,7 +9,7 @@ class Transaction: private NonCopyable {
 public:
     template <typename ...Args>
     Transaction(Looper *looper, Args &&...args);
-    
+
     template <typename ...Args>
     Transaction& then(Args &&...args);
 

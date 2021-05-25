@@ -7,7 +7,7 @@ class SocketListenException: public SocketException {
 public:
     static constexpr const char *TAG = "socket listen exception";
     using SocketException::SocketException;
-    SocketListenException(int err): SocketException(TAG, err) { }
+    SocketListenException(int err): SocketException(TAG, err) {}
 };
 
 } // mutty

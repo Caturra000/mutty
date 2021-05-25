@@ -33,7 +33,7 @@ inline Pointer<T>& Pointer<T>::operator=(Pointer rhs) {
 
 template <typename T>
 template <typename Base>
-inline Base* Pointer<T>::castTo() { 
+inline Base* Pointer<T>::castTo() {
     static_assert(std::is_base_of<Base, T>::value, "can only cast to Pointer<Base>/Base*");
     return _ptr;
 }

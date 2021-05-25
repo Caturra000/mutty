@@ -23,7 +23,7 @@ public:
     Pointer<MessageQueue> getProvider() { return &_provider; }
     Pointer<Multiplexer> getPoller() { return &_poller; }
     Pointer<Timer> getScheduler() { return &_scheduler; }
-    
+
 private:
     void consume(Message msg) { msg.target->handle(msg); }
 

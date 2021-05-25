@@ -28,7 +28,7 @@ private:
 };
 
 inline void Multiplexer::poll(Nanosecond timeout) {
-    int count = epoll_wait(_epollFd, _events.data(), _events.size(), 
+    int count = epoll_wait(_epollFd, _events.data(), _events.size(),
                     std::chrono::duration_cast<Millisecond>(timeout).count());
     if(count < 0) throw EpollWaitException(errno);
     dispatchActiveContext(count);

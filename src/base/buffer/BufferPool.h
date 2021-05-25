@@ -10,7 +10,7 @@ class CachedBuffer: public Buffer {
 public:
     using Buffer::Buffer;
     CachedBuffer(int size, std::function<void(CachedBuffer&)> destructor)
-        : Buffer(size), _destructor(std::move(destructor)) { }
+        : Buffer(size), _destructor(std::move(destructor)) {}
     CachedBuffer(CachedBuffer&&) = default;
     CachedBuffer(const CachedBuffer&) = default;
     CachedBuffer& operator=(CachedBuffer&&) = default;

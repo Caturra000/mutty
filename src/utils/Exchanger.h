@@ -57,7 +57,7 @@ inline void swap(Exchanger &lhs, Exchanger &rhs) {
 
 template <typename ValueType>
 inline ValueType* cast(Exchanger *object) {
-    return object ? 
+    return object ?
         std::addressof(static_cast<Exchanger::Holder<ValueType>*>(object->_content)->_held)
         : nullptr;
 }
