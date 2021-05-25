@@ -4,20 +4,24 @@
 #include <netinet/in.h>
 #include <string>
 #include "utils/StringUtils.h"
+#include "log/Log.h"
 namespace mutty {
 
 struct InetAddress {
 public:
-    InetAddress(sockaddr_in address = {}): _address(address) {}
-    InetAddress(uint32_t ip, uint16_t port): _address{AF_INET, ::htons(port), ::htonl(ip)} {}
-    InetAddress(const std::string &ip, uint16_t port): InetAddress(stringToIp(ip), port) {}
+    InetAddress(sockaddr_in address = {}): _address(address) { createReport(); }
+    InetAddress(uint32_t ip, uint16_t port): _address{AF_INET, ::htons(port), ::htonl(ip)} { createReport(); }
+    InetAddress(const std::string &ip, uint16_t port): InetAddress(stringToIp(ip), port) { createReport(); }
     InetAddress(const std::string &address);
 
-    std::string toString() { return ipToString() + ":" + std::to_string(::ntohs(_address.sin_port)); }
+    std::string toString() const { return ipToString() + ":" + std::to_string(::ntohs(_address.sin_port)); }
+    uint16_t rawPort() const { return ::ntohs(_address.sin_port); };
+    uint32_t rawIp() const { return ::ntohl(_address.sin_addr.s_addr); };
 
 private:
-    std::string ipToString();
-    uint32_t stringToIp(std::string s); // static
+    std::string ipToString() const;
+    uint32_t stringToIp(std::string s) const; // static
+    void createReport() { MUTTY_LOG_DEBUG("calling inet =", toString()); } // debug
 
     sockaddr_in _address;
 };
@@ -32,7 +36,7 @@ inline InetAddress::InetAddress(const std::string &address) {
     };
 }
 
-inline std::string InetAddress::ipToString() {
+inline std::string InetAddress::ipToString() const {
     std::string s;
     uint32_t addr = ::ntohl(_address.sin_addr.s_addr); 
     for(int chunk = 3; ~chunk; --chunk) {
@@ -41,7 +45,7 @@ inline std::string InetAddress::ipToString() {
     return s;
 }
 
-inline uint32_t InetAddress::stringToIp(std::string s) {
+inline uint32_t InetAddress::stringToIp(std::string s) const {
     auto pivots = split(s, '.');
     uint32_t ip = 0;
     for(auto &&p : pivots) {

@@ -8,6 +8,7 @@
 #include "utils/NonCopyable.h"
 #include "base/context/Context.h"
 #include "throws/Exceptions.h"
+#include "log/Log.h"
 namespace mutty {
 
 class Multiplexer: private NonCopyable {
@@ -48,6 +49,9 @@ inline Multiplexer::Multiplexer(): _epollFd(epoll_create1(EPOLL_CLOEXEC)), _even
 }
 
 inline void Multiplexer::dispatchActiveContext(int count) {
+    // if(count > 0) {
+    //     MUTTY_LOG_DEBUG("multiplexer dispatches", count, "active context(s)");
+    // }
     for(int i = 0; i < count; ++i) {
         auto ctx = static_cast<Context*>(_events[i].data.ptr);
         auto revent = _events[i].events;
@@ -56,6 +60,7 @@ inline void Multiplexer::dispatchActiveContext(int count) {
 }
 
 inline void Multiplexer::dispatch(Context *ctx, int revent) {
+    // MUTTY_LOG_DEBUG("multiplexer dispatch: context_fd =", ctx->fd(), "revent_mask = ", revent);
     if((revent & POLLHUP) && !(revent & POLLIN)) {
         ctx->sendCloseMessage();
     }

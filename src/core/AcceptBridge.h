@@ -5,6 +5,7 @@
 namespace mutty {
 
 inline void AcceptHandler::handleRead(int who) {
+    MUTTY_LOG_INFO("acceptor receives new connection request.");
     InetAddress peerAddress;
     Socket connectSocket = _context->acceptSocket.accept(peerAddress);
     _context->exchanger = std::pair<Socket, InetAddress>(

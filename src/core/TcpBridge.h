@@ -17,7 +17,7 @@ inline void TcpHandler::handleRead() {
 
 inline void TcpHandler::handleWrite() {
     if(_context->writeEnabled()) {
-        int n = _context->outputBuffer.writeTo(_context->acceptedSocket.fd()); // can async?
+        int n = _context->outputBuffer.writeTo(_context->acceptedSocket.fd());
         if(n > 0) {
             if(_context->outputBuffer.unread() == 0) {
                 _context->disableWrite();
@@ -39,6 +39,7 @@ inline void TcpHandler::handleClose() {
         _context->disableRead();
         _context->disableWrite();
         auto context = _context.get();
+        MUTTY_LOG_DEBUG("send async disconnected message. hash =", _context->hashcode());
         // the last message of context
         _context->async([this, context] {
             context->setDisConnected();
@@ -52,6 +53,8 @@ inline void TcpHandler::handleStart() {
         _context->setConnected();
         _context->enableRead();
         _connectionCallback();
+        MUTTY_LOG_INFO("connection started. info:", _context->simpleInfo());
+        MUTTY_LOG_DEBUG("connection started. hash =", _context->hashcode());
     }
 }
 

@@ -10,6 +10,7 @@
 #include "base/handler/MessageQueue.h"
 #include "net/Socket.h"
 #include "net/InetAddress.h"
+#include "log/Log.h"
 #include "ContextImpl.h"
 #include "TcpHandler.h"
 namespace mutty {
@@ -17,10 +18,10 @@ namespace mutty {
 
 class TcpContext: public ContextImpl, public std::enable_shared_from_this<TcpContext> {
 public:
-    bool isConnecting() { return networkStatus == CONNECTING; }
-    bool isConnected() { return networkStatus == CONNECTED; }
-    bool isDisConnecting() { return networkStatus == DISCONNECTING; }
-    bool isDisConnected() { return networkStatus == DISCONNECTED; }
+    bool isConnecting() const { return _networkStatus == CONNECTING; }
+    bool isConnected() const { return _networkStatus == CONNECTED; }
+    bool isDisConnecting() const { return _networkStatus == DISCONNECTING; }
+    bool isDisConnected() const { return _networkStatus == DISCONNECTED; }
 
     void shutdown(/*bool force = false*/);
     void forceClose();
@@ -34,6 +35,10 @@ public:
     int fd() const override { return acceptedSocket.fd(); }
 
     void start();
+
+    const std::string& simpleInfo() const;
+    const char* networkInfo() const;
+    uint64_t hashcode() const;
 
     Callable binder(std::function<void(TcpContext*)> functor);
 
@@ -54,14 +59,16 @@ public:
     Pointer<Timer> scheduler;
 
 private:
-    void setConnecting() { networkStatus = CONNECTING; }
-    void setConnected() { networkStatus = CONNECTED; }
-    void setDisConnecting() { networkStatus = DISCONNECTING; }
-    void setDisConnected() { networkStatus = DISCONNECTED; }
+    void setConnecting() { _networkStatus = CONNECTING; }
+    void setConnected() { _networkStatus = CONNECTED; }
+    void setDisConnecting() { _networkStatus = DISCONNECTING; }
+    void setDisConnected() { _networkStatus = DISCONNECTED; }
 
 private:
     TcpHandler _handler;
-    NetworkStatus networkStatus { CONNECTING };
+    NetworkStatus _networkStatus { CONNECTING };
+    mutable std::string _cachedInfo;
+    mutable uint64_t _hashcode {};
 
     friend class TcpHandler;
 };
@@ -98,8 +105,33 @@ inline void TcpContext::send(const void *data, int length) {
 }
 
 inline void TcpContext::start() {
-    std::weak_ptr<TcpContext> _this = shared_from_this();
+    MUTTY_LOG_INFO("new connection, try to start, hash =", hashcode());
     sendMessage(TcpHandler::MSG_TCP_START);
+}
+
+inline const std::string& TcpContext::simpleInfo() const {
+    if(_cachedInfo.length()) return _cachedInfo;
+    return _cachedInfo = "socket fd = " + std::to_string(acceptedSocket.fd())
+        + ", local = " + localAddress.toString() + ", peer = " + peerAddress.toString();
+}
+
+inline const char* TcpContext::networkInfo() const {
+    switch(_networkStatus) {
+        case CONNECTING: return "CONNECTING";
+        case CONNECTED: return "CONNECTED";
+        case DISCONNECTING: return "DISCONNECTING";
+        case DISCONNECTED: return "DISCONNECTED";
+        default: return "?";
+    }
+}
+
+inline uint64_t TcpContext::hashcode() const {
+    if(_hashcode) return _hashcode;
+    return _hashcode = (uint64_t(acceptedSocket.fd()) << 32)
+        ^ uint64_t(localAddress.rawIp())
+        ^ uint64_t(peerAddress.rawIp())
+        ^ (uint64_t(localAddress.rawPort()) << 24)
+        ^ (uint64_t(peerAddress.rawPort()) << 24);
 }
 
 inline Callable TcpContext::binder(std::function<void(TcpContext*)> functor) {

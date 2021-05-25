@@ -54,6 +54,7 @@ inline void Server::start() {
         connection->start();
     });
     _acceptor->start();
+    MUTTY_LOG_INFO("server started.");
 }
 
 inline void Server::tcpCallbackInit(TcpContext *connection) {

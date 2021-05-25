@@ -9,6 +9,7 @@
 #include <bits/stdc++.h>
 #include "utils/NonCopyable.h"
 #include "throws/Exceptions.h"
+#include "log/Log.h"
 #include "InetAddress.h"
 namespace mutty {
 
@@ -66,13 +67,19 @@ private:
     int _socketFd;
 };
 
-inline void Socket::bind(const InetAddress &address) { 
+inline void Socket::bind(const InetAddress &address) {
+    MUTTY_LOG_DEBUG("socket binding. fd =", _socketFd);
     if(::bind(_socketFd, (const sockaddr*)(&address), sizeof(InetAddress))) {
+        MUTTY_LOG_WARN("socket bind failed. fd =", _socketFd,
+            "throws exception.", "errorno = ", errno);
         throw SocketBindException(errno);
     } 
 }
-inline void Socket::listen(int backlog) { 
+inline void Socket::listen(int backlog) {
+    MUTTY_LOG_DEBUG("socket listening. fd =", _socketFd);
     if(::listen(_socketFd, backlog)) {
+         MUTTY_LOG_WARN("socket listen failed. fd =", _socketFd,
+            "throws exception.", "errorno = ", errno);
         throw SocketListenException(errno); 
     }
 }
@@ -82,13 +89,22 @@ inline Socket Socket::accept(InetAddress &address) {
     socklen_t len = sizeof(address);
     int connectFd = ::accept4(_socketFd, (sockaddr*)(&address), &len,
                         SOCK_NONBLOCK | SOCK_CLOEXEC);
-    if(connectFd < 0) throw SocketAcceptException(errno);
+    if(connectFd < 0) {
+        MUTTY_LOG_WARN("socket::accept failed, throws SocketAcceptException.", "errno =", errno);
+        throw SocketAcceptException(errno);
+    }
+    MUTTY_LOG_DEBUG("socket accepted. connected fd =", connectFd, "listen fd =", _socketFd);
     return Socket(connectFd);
 }
 
 inline Socket Socket::accept() {
     int connectFd = ::accept4(_socketFd, nullptr, nullptr,
                         SOCK_NONBLOCK | SOCK_CLOEXEC);
+    if(connectFd < 0) {
+        MUTTY_LOG_WARN("socket::accept failed, throws SocketAcceptException.", "errno =", errno);
+        throw SocketAcceptException(errno);
+    }
+    MUTTY_LOG_DEBUG("socket accepted. connected fd =", connectFd, "listen fd =", _socketFd);
     return Socket(connectFd);
 }
 
@@ -150,13 +166,16 @@ inline void Socket::setNonBlock() {
 inline Socket::Socket()
     : _socketFd(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)) {
     if(_socketFd < 0) {
+        MUTTY_LOG_WARN("creating socket but failed, throws exception.", "errno =", errno);
         throw SocketCreateException(errno);
     }
+    MUTTY_LOG_DEBUG("socket created. fd =", _socketFd);
 }
 
 inline Socket::~Socket() {
     if(_socketFd != INVALID_FD) {
         ::close(_socketFd);
+        MUTTY_LOG_DEBUG("socket closed. fd =", _socketFd);
     }
 }
 
