@@ -5,7 +5,7 @@
 namespace mutty {
 
 inline void TcpHandler::handleRead() {
-    int n = _context->inputBuffer.readFrom(_context->acceptedSocket.fd());
+    ssize_t n = _context->inputBuffer.readFrom(_context->acceptedSocket.fd());
     if(n > 0) {
         _messageCallback();
     } else if(n == 0) { // FIN
@@ -17,7 +17,7 @@ inline void TcpHandler::handleRead() {
 
 inline void TcpHandler::handleWrite() {
     if(_context->writeEnabled()) {
-        int n = _context->outputBuffer.writeTo(_context->acceptedSocket.fd());
+        ssize_t n = _context->outputBuffer.writeTo(_context->acceptedSocket.fd());
         if(n > 0) {
             if(_context->outputBuffer.unread() == 0) {
                 _context->disableWrite();

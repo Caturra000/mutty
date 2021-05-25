@@ -30,7 +30,7 @@ public:
     template <size_t N>
     void send(const char (&data)[N]) { send(data, N); }
     void send(const std::string &str) { send(str.c_str(), str.length()); }
-    void send(const void *data, int length);
+    void send(const void *data, ssize_t length);
 
     int fd() const override { return acceptedSocket.fd(); }
 
@@ -97,7 +97,7 @@ inline void TcpContext::forceClose(Nanosecond delay) {
     });
 }
 
-inline void TcpContext::send(const void *data, int length) {
+inline void TcpContext::send(const void *data, ssize_t length) {
     if(!isDisConnecting() || !isDisConnected()) {
         outputBuffer.append(static_cast<const char *>(data), length);
         if(!(_events & EVENT_WRITE)) enableWrite();
