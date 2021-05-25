@@ -13,6 +13,7 @@
 #include "core/ConnectionPool.h"
 #include "core/TcpBridge.h"
 #include "core/TcpPolicy.h"
+#include "log/Log.h"
 namespace mutty {
 
 class Server: private NonCopyable {
