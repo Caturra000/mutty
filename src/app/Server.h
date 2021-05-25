@@ -43,11 +43,12 @@ private:
 
 inline void Server::start() {
     _acceptor->onNewConnection([this](AcceptContext *context) {
-        // TODO poll
-        auto connectionInfo = std::move(cast<
-            std::pair<Socket, InetAddress>&>(context->exchanger));
-        Socket &connectionSocket = connectionInfo.first;
-        InetAddress &peerAddress = connectionInfo.second;
+        // auto connectionInfo = std::move(cast<
+        //     std::pair<Socket, InetAddress>&>(context->exchanger));
+        auto connectionInfo = context->poll();
+        if(!connectionInfo) return;
+        Socket &connectionSocket = connectionInfo->first;
+        InetAddress &peerAddress = connectionInfo->second;
         auto connection = _connections.createNewConnection(
             std::move(connectionSocket), context->localAddress, peerAddress);
         tcpCallbackInit(connection.get());

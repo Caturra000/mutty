@@ -8,8 +8,9 @@ inline void AcceptHandler::handleRead(int who) {
     MUTTY_LOG_INFO("acceptor receives new connection request.");
     InetAddress peerAddress;
     Socket connectSocket = _context->acceptSocket.accept(peerAddress);
-    _context->exchanger = std::pair<Socket, InetAddress>(
-        std::move(connectSocket), std::move(peerAddress));
+    // _context->exchanger = std::pair<Socket, InetAddress>(
+    //     std::move(connectSocket), std::move(peerAddress));
+    _context->_connectionInfo = cpp11::make_unique<std::pair<Socket, InetAddress>>(std::move(connectSocket), std::move(peerAddress));
     _newConnectionCallback(); // add to ConnectionPool of Server
 }
 

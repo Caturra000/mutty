@@ -12,7 +12,7 @@ namespace mutty {
 class AcceptContext: public ContextImpl, public std::enable_shared_from_this<AcceptContext> {
 public:
     int fd() const override { return acceptSocket.fd(); }
-
+    std::unique_ptr<std::pair<Socket, InetAddress>> poll();
     void start();
 
     HANDLER_CALLBACK_DEFINE(onNewConnection, _handler._newConnectionCallback, AcceptContext, this)
@@ -22,11 +22,18 @@ public:
 public:
     Socket acceptSocket;
     InetAddress localAddress;
-    Exchanger exchanger;
+    Exchanger exchanger; // deprecated
 
 private:
     AcceptHandler _handler;
+    std::unique_ptr<std::pair<Socket, InetAddress>> _connectionInfo;
+
+    friend class AcceptHandler;
 };
+
+inline std::unique_ptr<std::pair<Socket, InetAddress>> AcceptContext::poll() {
+    return std::move(_connectionInfo);
+}
 
 inline void AcceptContext::start() {
     acceptSocket.listen();
