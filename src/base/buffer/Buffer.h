@@ -5,6 +5,7 @@
 #include <bits/stdc++.h>
 #include "utils/Algorithms.h"
 #include "net/Socket.h"
+#include "log/Log.h"
 namespace mutty {
 
 class Buffer {
@@ -104,19 +105,34 @@ inline ssize_t Buffer::readFrom(int fd) {
     ssize_t n = ::readv(fd, vec, 2);
     if(n > 0) {
         if(n <= bufferLimit) {
+            MUTTY_LOG_DEBUG("buffer read from fd:", fd,
+                "content =", IoVector{writeBuffer(), (size_t)n});
             hasWritten(n);
         } else {
+            MUTTY_LOG_DEBUG("buffer read from fd:", fd,
+                "content =", IoVector{writeBuffer(), (size_t)bufferLimit});
             hasWritten(bufferLimit);
             ssize_t localSize = n - bufferLimit;
+            MUTTY_LOG_DEBUG("[+] buffer read, will ignore too long message.",
+                "content =", IoVector{localBuffer, std::min<size_t>(localSize, 100)});
             append(localBuffer, localSize);
         }
+    }
+    if(n < 0) {
+        MUTTY_LOG_WARN("buffer is unable to read from fd:", fd, "errno =", errno);
     }
     // n < 0 error
     return n;
 }
 
 inline ssize_t Buffer::writeTo(int fd) {
+    MUTTY_LOG_DEBUG("try to write to fd:", fd,
+        "content =", IoVector{readBuffer(), (size_t)unread()});
     ssize_t n = ::write(fd, readBuffer(), unread());
+    if(n < 0) {
+        MUTTY_LOG_WARN("buffer is unable to write to fd:", fd, "errno =", errno);
+        return n;
+    }
     hasRead(n);
     // n < 0 !EAGAIN throw
     return n;

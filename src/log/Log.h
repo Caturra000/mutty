@@ -9,6 +9,7 @@
     #define LOG_ERROR(...) DLOG_ERROR(__VA_ARGS__)
     #define LOG_WTF(...)   DLOG_WTF(__VA_ARGS__)
     namespace mutty { using dlog::Log; }
+    namespace mutty { using dlog::IoVector; }
 #else
     #define LOG_DEBUG(...) (void)0
     #define LOG_INFO(...)  (void)0

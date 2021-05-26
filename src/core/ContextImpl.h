@@ -9,6 +9,7 @@
 #include "base/handler/Message.h"
 #include "core/Looper.h"
 #include "core/Multiplexer.h"
+#include "log/Log.h"
 namespace mutty {
 
 class ContextImpl: public Context {
@@ -37,6 +38,11 @@ protected:
     void enableWrite() override;
     void disableRead() override;
     void disableWrite() override;
+
+    // debug
+
+    const char* stateToString() const;
+    const char* eventToString() const;
 
     ContextImpl(Handler *handler = nullptr, Looper *looper = nullptr);
 
@@ -81,22 +87,41 @@ inline void ContextImpl::sendMessageWithBinaryData(int what, int size, void *dat
 }
 
 inline void ContextImpl::updateState() {
+    auto eventToString = [this] {
+
+    };
+
+    MUTTY_LOG_DEBUG("try to update context state,", "original state =", stateToString(),_state, "fd =", fd());
     if(_state == STATE_NEW || _state == STATE_DELETED) {
         _state = STATE_ADDED;
         _multiplexer->update(EPOLL_CTL_ADD, this);
+        MUTTY_LOG_DEBUG("context updated, added to epoll", "state = ADDING", "fd =", fd());
     } else { // STATE_ADDED
         if(_events == EVENT_NONE) {
             _multiplexer->update(EPOLL_CTL_DEL, this);
             _state = STATE_DELETED;
+            MUTTY_LOG_DEBUG("context updated, deleted from epoll", "state = DELETED", "fd =", fd());
         } else {
             _multiplexer->update(EPOLL_CTL_MOD, this);
+            MUTTY_LOG_DEBUG("context updated, modified", "fd =", fd());
         }
+    }
+}
+
+inline const char* ContextImpl::eventToString() const {
+    switch(_events) {
+        case EVENT_NONE: return "NONE";
+        case EVENT_READ: return "READ";
+        case EVENT_WRITE: return "WRITE";
+        case EVENT_READ | EVENT_WRITE: return "READ_WRITE";
+        default: return "?";
     }
 }
 
 inline void ContextImpl::enableRead() {
     if(!(_events & EVENT_READ)) {
         _events |= EVENT_READ;
+        MUTTY_LOG_DEBUG("enable read event", "fd =", fd(), "event =", eventToString());
         updateState();
     }
 }
@@ -104,6 +129,7 @@ inline void ContextImpl::enableRead() {
 inline void ContextImpl::enableWrite() {
     if(!(_events & EVENT_WRITE)) {
         _events |= EVENT_WRITE;
+        MUTTY_LOG_DEBUG("enable write event", "fd =", fd(), "event =", eventToString());
         updateState();
     }
 }
@@ -111,6 +137,7 @@ inline void ContextImpl::enableWrite() {
 inline void ContextImpl::disableRead() {
     if(_events & EVENT_READ) {
         _events &= ~EVENT_READ;
+        MUTTY_LOG_DEBUG("disable read event", "fd =", fd(), "event =", eventToString());
         updateState();
     }
 }
@@ -118,7 +145,17 @@ inline void ContextImpl::disableRead() {
 inline void ContextImpl::disableWrite() {
     if(_events & EVENT_WRITE) {
         _events &= ~EVENT_WRITE;
+        MUTTY_LOG_DEBUG("disable write event", "fd =", fd(), "event =", eventToString());
         updateState();
+    }
+}
+
+inline const char* ContextImpl::stateToString() const {
+    switch(_state) {
+        case STATE_NEW: return "NEW";
+        case STATE_ADDED: return "ADDED";
+        case STATE_DELETED: return "DELETED";
+        default: return "?";
     }
 }
 

@@ -54,7 +54,7 @@ inline void TcpHandler::handleStart() {
         _context->enableRead();
         _connectionCallback();
         MUTTY_LOG_INFO("connection started. info:", _context->simpleInfo());
-        MUTTY_LOG_DEBUG("connection started. hash =", _context->hashcode());
+        MUTTY_LOG_DEBUG("[+] connection started. hash =", _context->hashcode());
     }
 }
 

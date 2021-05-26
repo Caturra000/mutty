@@ -5,13 +5,14 @@
 #include "utils/ThreadPool.h"
 #include "utils/Compat.h"
 #include "utils/NonCopyable.h"
+#include "log/Log.h"
 #include "Looper.h"
 namespace mutty {
 
 template <size_t N>
 class LooperPool: private NonCopyable {
 public:
-    std::unique_ptr<Looper>& pick() { return _pool[random<size_t>() & N-1]; }
+    std::unique_ptr<Looper>& pick();
 
     LooperPool();
 
@@ -19,6 +20,13 @@ private:
     std::array<std::unique_ptr<Looper>, N> _pool;
     ThreadPool _threads;
 };
+
+template <size_t N>
+inline std::unique_ptr<Looper>& LooperPool<N>::pick() {
+    size_t index = random<size_t>() & N-1;
+    MUTTY_LOG_DEBUG("LooperPool: pick index =", index);
+    return _pool[index];
+}
 
 template <size_t N>
 inline LooperPool<N>::LooperPool(): _threads(N) {
