@@ -87,10 +87,6 @@ inline void ContextImpl::sendMessageWithBinaryData(int what, int size, void *dat
 }
 
 inline void ContextImpl::updateState() {
-    auto eventToString = [this] {
-
-    };
-
     MUTTY_LOG_DEBUG("try to update context state,", "original state =", stateToString(),_state, "fd =", fd());
     if(_state == STATE_NEW || _state == STATE_DELETED) {
         _state = STATE_ADDED;
