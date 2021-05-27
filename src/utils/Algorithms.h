@@ -31,7 +31,17 @@ auto floorOfPowerOfTwo = [](int v) {
     return n-1;
 };
 
-template <typename T = unsigned long long, unsigned long long init = 19260817>
+template <size_t N>
+inline constexpr size_t hash(const char (&buf)[N]) {
+    size_t primes[] = {19260817, 233, 998244353};
+    size_t h = primes[0];
+    for(size_t i = 0; i < N; ++i) {
+        h += (buf[i]+primes[1]) * h + primes[2];
+    }
+    return h;
+}
+
+template <typename T = size_t, size_t init = hash(__TIME__)>
 inline T random() {
     static thread_local auto seed = init;
     seed = seed * 998244353 + 12345;
