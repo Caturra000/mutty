@@ -12,13 +12,11 @@
 #include "Multiplexer.h"
 namespace mutty {
 
+class LooperHandler;
 class Looper: private NonCopyable {
 public:
     void loop();
-
-    void stop() { _stop = true; }
-    bool onStop() { return _provider.hasNextUnlock(); }
-    bool isReadyToStop() { return _stop; }
+    void stop(); // thread-safe, cannot restart
 
     Pointer<MessageQueue> getProvider() { return &_provider; }
     Pointer<Multiplexer> getPoller() { return &_poller; }
@@ -34,9 +32,14 @@ private:
     Timer _scheduler;
 };
 
+inline void Looper::stop() {
+    _scheduler.runAt(now())
+        .with([this] { _stop = true; });
+}
+
 inline void Looper::loop() {
     Timer::ResultSet tasks;
-    for(MessageQueue provider; !_stop || onStop(); ) {
+    for(MessageQueue provider; !_stop;) {
         auto timeout = _scheduler.run(tasks);
         for(auto &&task : tasks) task();
         _poller.poll(std::max(timeout, 1ms));

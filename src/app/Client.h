@@ -28,8 +28,6 @@ public:
     void disableRetry() { _retry = false; }
     bool isRetryEnabled() { return _retry; }
 
-    void join() { while(!_hasEnabled || !_looper->isReadyToStop() || _looper->onStop()); }
-
     template <typename ...Args>
     Transaction startTransaction(Args &&...args);
 
