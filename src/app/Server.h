@@ -19,6 +19,7 @@ namespace mutty {
 class Server: private NonCopyable {
 public:
     void start();
+    void stop(); // cannot restart, should be protected by _looper if called in context (unsafe)
 
     TCP_POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy)
     TCP_POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy)
@@ -28,6 +29,7 @@ public:
     Server(Looper *looper, InetAddress localAddress)
         : _looper(looper),
           _acceptor(std::make_shared<AcceptContext>(looper, localAddress)) {}
+    ~Server();
 private:
     void tcpCallbackInit(TcpContext*);
 
@@ -39,9 +41,12 @@ private:
     Pointer<Looper> _looper;
     std::shared_ptr<AcceptContext> _acceptor;
     ConnectionPool _connections;
+    bool _start = false;
+    bool _stop = false; // TODO use atomic
 };
 
 inline void Server::start() {
+    if(_start) return;
     _acceptor->onNewConnection([this](AcceptContext *context) {
         // auto connectionInfo = std::move(cast<
         //     std::pair<Socket, InetAddress>&>(context->exchanger));
@@ -55,7 +60,21 @@ inline void Server::start() {
         connection->start();
     });
     _acceptor->start();
+    _start = true;
     MUTTY_LOG_INFO("server started.");
+}
+
+inline void Server::stop() {
+    if(!_start) return;
+    _acceptor->stop();
+    _connections.stop();
+    _stop = true;
+}
+
+inline Server::~Server() {
+    if(_start && !_stop) {
+        stop();
+    }
 }
 
 inline void Server::tcpCallbackInit(TcpContext *connection) {

@@ -13,6 +13,7 @@ template <size_t N>
 class LooperPool: private NonCopyable {
 public:
     std::unique_ptr<Looper>& pick();
+    std::unique_ptr<Looper>& pick(size_t index) { return _pool[index]; }
 
     LooperPool();
 

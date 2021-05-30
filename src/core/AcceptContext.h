@@ -14,10 +14,12 @@ public:
     int fd() const override { return acceptSocket.fd(); }
     std::unique_ptr<std::pair<Socket, InetAddress>> poll();
     void start();
+    void stop(); // cannot restart
 
     HANDLER_CALLBACK_DEFINE(onNewConnection, _handler._newConnectionCallback, AcceptContext, this)
 
     AcceptContext(Looper *looper, InetAddress localAddress);
+    ~AcceptContext() { if(_start && !_stop) stop(); }
 
 public:
     Socket acceptSocket;
@@ -27,6 +29,8 @@ public:
 private:
     AcceptHandler _handler;
     std::unique_ptr<std::pair<Socket, InetAddress>> _connectionInfo;
+    bool _start = false;
+    bool _stop = false;
 
     friend class AcceptHandler;
 };
@@ -36,8 +40,16 @@ inline std::unique_ptr<std::pair<Socket, InetAddress>> AcceptContext::poll() {
 }
 
 inline void AcceptContext::start() {
+    if(_start) return;
     acceptSocket.listen();
     enableRead();
+    _start = true;
+}
+
+inline void AcceptContext::stop() {
+    if(!_start) return;
+    disableRead();
+    _stop = true;
 }
 
 inline AcceptContext::AcceptContext(Looper *looper, InetAddress localAddress)

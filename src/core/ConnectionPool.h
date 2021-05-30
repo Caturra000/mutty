@@ -18,7 +18,10 @@ public:
                                                     InetAddress localAddress,
                                                     InetAddress peerAddress);
 
+    void stop();
+
     ConnectionPoolBase(int size = 16): _container(size) {}
+    ~ConnectionPoolBase() { if(!_stop) stop(); }
 
 private:
     std::shared_ptr<TcpContext>& get(int index) { return _container[index]; }
@@ -28,6 +31,7 @@ private:
 private:
     std::vector<std::shared_ptr<TcpContext>> _container;
     LooperPool<N> _looperPool;
+    bool _stop = false;
 
     using GcBase = WeakReference<ConnectionPoolBase<N>>;
     friend class WeakReference<ConnectionPoolBase<N>>;
@@ -51,6 +55,18 @@ inline std::shared_ptr<TcpContext> ConnectionPoolBase<N>::createNewConnection(
         _container.emplace_back(std::move(connection));
         return _container.back();
     }
+}
+
+template <size_t N>
+inline void ConnectionPoolBase<N>::stop() {
+    for(auto &connection : _container) {
+        if(connection == nullptr) continue; // killed by GcBase
+        connection->forceClose();
+    }
+    for(size_t i = 0; i < N; ++i) {
+        _looperPool.pick(i)->stop();
+    }
+    _stop = true;
 }
 
 template <size_t N>
