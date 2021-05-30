@@ -16,6 +16,9 @@ class LooperHandler;
 class Looper: private NonCopyable {
 public:
     void loop();
+    void loopAsync(std::thread &thread);
+    std::thread loopAsync();
+
     void stop(); // thread-safe, cannot restart
 
     Pointer<MessageQueue> getProvider() { return &_provider; }
@@ -32,11 +35,6 @@ private:
     Timer _scheduler;
 };
 
-inline void Looper::stop() {
-    _scheduler.runAt(now())
-        .with([this] { _stop = true; });
-}
-
 inline void Looper::loop() {
     Timer::ResultSet tasks;
     for(MessageQueue provider; !_stop;) {
@@ -51,6 +49,19 @@ inline void Looper::loop() {
             consume(provider.next());
         }
     }
+}
+
+inline void Looper::loopAsync(std::thread &thread) {
+    thread = loopAsync();
+}
+
+inline std::thread Looper::loopAsync() {
+    return std::thread{[this] {loop();}};
+}
+
+inline void Looper::stop() {
+    _scheduler.runAt(now())
+        .with([this] { _stop = true; });
 }
 
 } // mutty
