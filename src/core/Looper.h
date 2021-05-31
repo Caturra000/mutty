@@ -21,6 +21,9 @@ public:
 
     void stop(); // thread-safe, cannot restart
 
+    template <typename ...Func>
+    void async(Func &&...func);
+
     Pointer<MessageQueue> getProvider() { return &_provider; }
     Pointer<Multiplexer> getPoller() { return &_poller; }
     Pointer<Timer> getScheduler() { return &_scheduler; }
@@ -60,8 +63,13 @@ inline std::thread Looper::loopAsync() {
 }
 
 inline void Looper::stop() {
+    async([this] { _stop = true; });
+}
+
+template <typename ...Func>
+inline void Looper::async(Func &&...func) {
     _scheduler.runAt(now())
-        .with([this] { _stop = true; });
+        .with(std::forward<Func>(func)...);
 }
 
 } // mutty
