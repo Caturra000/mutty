@@ -20,7 +20,7 @@ public:
     std::thread loopAsync();
 
     void stop(); // thread-safe, cannot restart
-    void join() { while(_latch.load()); }
+    void join() { while(_latch.load()) std::this_thread::yield(); }
 
     template <typename ...Func>
     void async(Func &&...func);

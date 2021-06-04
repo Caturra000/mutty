@@ -19,10 +19,13 @@ namespace mutty {
 
 class Client: private NonCopyable {
 public:
-    std::future<bool> start();
-    void connect();
-    // void disconnect();
-    // void stop();
+    enum class SyncPolicy: bool {SYNC = false, ASYNC = true};
+
+    void start(SyncPolicy policy = SyncPolicy::ASYNC); // thread-safe
+    void stop(SyncPolicy policy = SyncPolicy::ASYNC); // thread-safe
+
+    void startLatch();
+    void stopLatch();
 
     void enableRetry() { _retry = true; }
     void disableRetry() { _retry = false; }
@@ -39,8 +42,10 @@ public:
     Client(Looper *looper, InetAddress serverAddress)
         : _looper(looper),
           _serverAddress(serverAddress) {}
+    ~Client();
 
 private:
+    void connect();
     void connecting(Socket socket/*, InetAddress address*/);
     void retry();
     void tcpCallbackInit(TcpContext *connection);
@@ -52,8 +57,8 @@ private:
     InetAddress _serverAddress;
     Millisecond _retryInterval {50ms};
     bool _retry {true};
-    bool _hasEnabled {false};
-    std::promise<bool> _connectedPromise;
+    std::atomic<bool> _start {false}; // use atomic for dtor check (not in loop thread)
+    std::atomic<bool> _stop {false};
 
     std::unique_ptr<TcpPolicy> _connectPolicy;
     std::unique_ptr<TcpPolicy> _messagePolicy;
@@ -61,11 +66,38 @@ private:
     std::unique_ptr<TcpPolicy> _closePolicy;
 };
 
-inline std::future<bool> Client::start() {
-    auto scheduler = _looper->getScheduler();
-    scheduler->runAt(now())
-        .with([this] { connect(); });
-    return _connectedPromise.get_future();
+inline void Client::start(Client::SyncPolicy policy) {
+    _looper->async([this] { connect(); });
+    if(policy == Client::SyncPolicy::SYNC) startLatch();
+}
+
+inline void Client::stop(Client::SyncPolicy policy) {
+    if(!_start.load()) return;
+    _looper->async([&] {
+        if(!_start.load()) return;
+        _connection->forceClose();
+        _stop.store(true);
+    });
+    if(policy == Client::SyncPolicy::SYNC) stopLatch();
+}
+
+inline void Client::startLatch() {
+    while(!_start.load()) std::this_thread::yield();
+}
+
+inline void Client::stopLatch() {
+    while(!_stop.load()) std::this_thread::yield();
+}
+
+template <typename ...Args>
+inline Transaction Client::startTransaction(Args &&...args) {
+    return Transaction(_looper.get(), std::forward<Args>(args)...);
+}
+
+inline Client::~Client() {
+    if(_start.load() && !_stop.load()) {
+        stop(SyncPolicy::SYNC);
+    }
 }
 
 inline void Client::connect() {
@@ -93,19 +125,13 @@ inline void Client::connect() {
     }
 }
 
-template <typename ...Args>
-inline Transaction Client::startTransaction(Args &&...args) {
-    return Transaction(_looper.get(), std::forward<Args>(args)...);
-}
-
 inline void Client::connecting(Socket socket) {
     socket.setNonBlock();
     _connection = std::make_shared<TcpContext>(
         _looper.get(), std::move(socket), InetAddress{/*NONE*/}, _serverAddress);
     tcpCallbackInit(_connection.get()); // FIXME EINPROGRESS EINTR
     _connection->start();
-    _hasEnabled = true;
-    _connectedPromise.set_value(true);
+    _start.store(true);
 }
 
 inline void Client::retry() {
