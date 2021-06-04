@@ -63,8 +63,12 @@ inline void ConnectionPoolBase<N>::stop() {
         if(connection == nullptr) continue; // killed by GcBase
         connection->forceClose();
     }
+    // async stop requeset
     for(size_t i = 0; i < N; ++i) {
         _looperPool.pick(i)->stop();
+    }
+    for(size_t i = 0; i < N; ++i) {
+        _looperPool.pick(i)->join();
     }
     _stop = true;
 }

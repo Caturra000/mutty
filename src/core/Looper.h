@@ -20,6 +20,7 @@ public:
     std::thread loopAsync();
 
     void stop(); // thread-safe, cannot restart
+    void join() { while(_latch.load()); }
 
     template <typename ...Func>
     void async(Func &&...func);
@@ -36,6 +37,7 @@ private:
     MessageQueue _provider;
     Multiplexer _poller;
     Timer _scheduler;
+    std::atomic<bool> _latch {true};
 };
 
 inline void Looper::loop() {
@@ -52,6 +54,7 @@ inline void Looper::loop() {
             consume(provider.next());
         }
     }
+    _latch.store(false);
 }
 
 inline void Looper::loopAsync(std::thread &thread) {
