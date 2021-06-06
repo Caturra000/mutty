@@ -34,6 +34,11 @@ public:
     template <typename ...Args>
     void async(Args &&...args) { _looper->async(std::forward<Args>(args)...); }
 
+    template <typename ...Args>
+    void send(Args &&...args) { _connection->send(std::forward<Args>(args)...); }
+    template <typename ...Args>
+    void sendAsync(Args &&...args) { _connection->sendAsync(std::forward<Args>(args)...); }
+
     TCP_POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy)
     TCP_POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy)
     TCP_POLICY_CALLBACK_DEFINE(onWriteComplete, _writeCompletePolicy)

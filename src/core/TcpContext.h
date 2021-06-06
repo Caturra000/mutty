@@ -31,6 +31,8 @@ public:
     void send(const char (&data)[N]) { send(data, N); }
     void send(const std::string &str) { send(str.c_str(), str.length()); }
     void send(const void *data, ssize_t length);
+    template <typename ...Args>
+    void sendAsync(Args &&...args); // helper
 
     int fd() const override { return acceptedSocket.fd(); }
 
@@ -101,6 +103,13 @@ inline void TcpContext::send(const void *data, ssize_t length) {
     if(!isDisConnecting() || !isDisConnected()) {
         outputBuffer.append(static_cast<const char *>(data), length);
         if(!(_events & EVENT_WRITE)) enableWrite();
+    }
+}
+
+template <typename ...Args>
+inline void TcpContext::sendAsync(Args &&...args) {
+    if(!isDisConnecting() || !isDisConnected()) {
+        async([=] { send(args...); }); // copy
     }
 }
 
