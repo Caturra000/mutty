@@ -32,7 +32,7 @@ public:
     bool isRetryEnabled() { return _retry; }
 
     template <typename ...Args>
-    Transaction startTransaction(Args &&...args);
+    void async(Args &&...args) { _looper->async(std::forward<Args>(args)...); }
 
     TCP_POLICY_CALLBACK_DEFINE(onConnect, _connectPolicy)
     TCP_POLICY_CALLBACK_DEFINE(onMessage, _messagePolicy)
@@ -87,11 +87,6 @@ inline void Client::startLatch() {
 
 inline void Client::stopLatch() {
     while(!_stop.load()) std::this_thread::yield();
-}
-
-template <typename ...Args>
-inline Transaction Client::startTransaction(Args &&...args) {
-    return Transaction(_looper.get(), std::forward<Args>(args)...);
 }
 
 inline Client::~Client() {
