@@ -1,6 +1,7 @@
 #ifndef __MUTTY_ACCEPT_CONTEXT_H__
 #define __MUTTY_ACCEPT_CONTEXT_H__
 #include <fcntl.h>
+#include <bits/stdc++.h>
 #include "utils/Pointer.h"
 #include "utils/Exchanger.h"
 #include "net/Socket.h"
@@ -25,6 +26,7 @@ public:
     Socket acceptSocket;
     InetAddress localAddress;
     Exchanger exchanger; // deprecated
+    std::exception_ptr exception;
 
 private:
     AcceptHandler _handler;

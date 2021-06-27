@@ -59,6 +59,7 @@ public:
     InetAddress localAddress, peerAddress;
     CachedBuffer inputBuffer, outputBuffer;
     Pointer<Timer> scheduler;
+    std::exception_ptr exception;
 
 private:
     void setConnecting() { _networkStatus = CONNECTING; }
