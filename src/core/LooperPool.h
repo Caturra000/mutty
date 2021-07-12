@@ -9,6 +9,9 @@
 #include "Looper.h"
 namespace mutty {
 
+// TODO remove template, use std::thread::hardware_concurrency() by default
+//     std::array<unique_ptr> -> std::vector && remove unique_ptr
+//     random & N-1 -> % N
 template <size_t N>
 class LooperPool: private NonCopyable {
 public:
